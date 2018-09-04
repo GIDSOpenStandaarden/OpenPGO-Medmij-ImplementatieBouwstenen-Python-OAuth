@@ -1,0 +1,5 @@
+aiohttp==3.3.2
+aiohttp-jinja2==1.0.0
+aiohttp-session==2.5.1
+cryptography==2.3
+SQLAlchemy==1.2.10

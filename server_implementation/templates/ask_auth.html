@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .c-page-section {
+            padding: 100px;
+        }
+
+        .c-box {
+            background-color: aliceblue;
+            border: 1px solid #eeeeee;
+            padding: 25px 50px;
+            width: 500px;
+            margin: auto;
+            font-family: sans-serif;
+            box-shadow: 2px 5px 10px rgba(0,0,0,.05);
+        }
+
+        .t-h1 {
+            text-transform: uppercase;
+        }
+
+        .c-button {
+            padding: 5px 10px;
+            border: 1px solid #b9d7f0;
+            outline: none;
+            background-color: #c7e5ff;
+            font-size: 16px;
+            width: 100px;
+            text-align: center;
+            display: inline-block;
+            cursor: pointer;
+            transition: background-color 200ms esae-out;
+        }
+
+        .c-button:hover {
+            background-color: #b9d7f0;
+        }
+
+        .c-inline-form {
+            display: inline-block;
+        }
+
+        .t-accent {
+            display: inline-block;
+            padding: 5px 10px;
+            font-weight: bold;
+            background-color: white;
+        }
+
+        .c-hr {
+            margin: 25px 0;
+            border: 0;
+            border-bottom: 1px solid #c7e5ff;
+        }
+
+        .t-align-right {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <section class="c-page-section">
+        <div class="c-box">
+            <h1 class="t-h1">Authorisatie verzoek</h1>
+            <p>Geeft u <span class="t-accent">{{pgo.organization_name}}</span> toestemming om u gegevens in te zien?</p>
+            <hr class="c-hr">
+            <div class="">
+                <form class="c-inline-form" action="/oauth/grant_auth/{{oauth_session_id}}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{csrf_token}}">
+                    <input type="hidden" name="auth_granted" value="false">
+                    <input class="c-button" type="submit" value="Nee">
+                </form>
+                <form class="c-inline-form" action="/oauth/grant_auth/{{oauth_session_id}}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{csrf_token}}">
+                    <input type="hidden" name="auth_granted" value="true">
+                    <input class="c-button" type="submit" value="Ja">
+                </form>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

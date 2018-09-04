@@ -34,7 +34,7 @@ from medmij_oauth.server import (
     Server
 )
 
-from medmij_oauth.tests.util import (
+from tests.util import (
     ret_false,
     ret_true,
     create_get_test_ocl

@@ -34,7 +34,7 @@ from medmij_oauth.client import (
     Client
 )
 
-from medmij_oauth.tests.util import (
+from tests.util import (
     create_get_test_zal
 )
 

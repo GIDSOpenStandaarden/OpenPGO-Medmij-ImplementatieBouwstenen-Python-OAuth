@@ -2,7 +2,6 @@
 import urllib.parse
 from . import (
     DataStore,
-    InMemoryDataStore,
     tokens,
     validation
 )
@@ -11,9 +10,6 @@ from medmij_oauth.exceptions import (
     OAuthException,
     ERRORS
 )
-
-def ret_true(**kwargs):
-    return True
 
 class Server():
     """Server class for all OAuth related stuff"""
@@ -59,7 +55,7 @@ class Server():
                 redirect=True
             )
 
-    def zg_resource_available(self, oauth_session=None, oauth_session_id=None, client_data={}, **kwargs):
+    def zg_resource_available(self, oauth_session=None, oauth_session_id=None, client_data=None, **kwargs):
         if oauth_session is None:
             oauth_session = self.data_store.get_oauth_session_by_id(oauth_session_id)
 

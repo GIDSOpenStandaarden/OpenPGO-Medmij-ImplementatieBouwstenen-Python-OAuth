@@ -26,7 +26,7 @@ def validate_access_token_response(data, oauth_session):
     if not data.get('access_token'):
         raise ValueError('No access token in response')
 
-    if not data.get('token_type') :
+    if not data.get('token_type'):
         raise ValueError('No token_type present in response')
 
     return True

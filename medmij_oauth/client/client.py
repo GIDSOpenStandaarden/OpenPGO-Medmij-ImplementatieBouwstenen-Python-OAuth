@@ -1,11 +1,4 @@
-import logging
 import urllib.parse
-
-from medmij_oauth.exceptions import (
-    ERRORS,
-    OAuthException,
-    lookup_error_code
-)
 
 from . import validation
 
@@ -16,15 +9,15 @@ class Client:
     def zal(self):
         return self._get_zal()
 
-    def __init__(self, data_store=None, get_zal=None, client_info={}, make_request=None):
+    def __init__(self, data_store=None, get_zal=None, client_info=None, make_request=None):
         assert get_zal is not None, "Can't instantiate Client without 'get_zal'"
         assert make_request is not None, "Can't instantiate Client without 'make_request'"
         assert client_info, "Can't instantiate Client without 'client_info'"
 
         if not issubclass(data_store.__class__, DataStore):
             raise ValueError(
-            'data_store argument should be a subclass of the DataStore abstract class'
-        )
+                'data_store argument should be a subclass of the DataStore abstract class'
+            )
 
         self.data_store = data_store
         self.client_info = client_info

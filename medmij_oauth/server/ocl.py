@@ -21,7 +21,7 @@ class OCL:
 
     def __iter__(self):
         for za in self._clients.values():
-          yield za
+            yield za
 
     def __repr__(self):
         return f'<ZAL ({len(self._clients)} clients>)'

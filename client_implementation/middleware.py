@@ -11,6 +11,7 @@ async def oauth_error_middleware(request, handler):
         response = await handler(request)
         return response
     except OAuthException as ex:
+        # TODO Remove
         if ex.redirect:
             return web.HTTPFound(ex.get_redirect_url())
 

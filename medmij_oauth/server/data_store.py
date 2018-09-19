@@ -5,15 +5,15 @@ from abc import ABC, abstractmethod
 class DataStore(ABC):
     """Abstract Class for data access, subclass this class and implement it's methods"""
     @abstractmethod
-    def create_oauth_session(self, response_type, client_id, redirect_uri, scope, state, **kwargs):
+    async def create_oauth_session(self, response_type, client_id, redirect_uri, scope, state, **kwargs):
         """Create a new oauth_session, persist the oauth_session and return it."""
 
     @abstractmethod
-    def get_oauth_session_by_id(self, oauth_session_id, **kwargs):
+    async def get_oauth_session_by_id(self, oauth_session_id, **kwargs):
         """Get a oauth_session based on it's id and return it, else return None"""
 
     @abstractmethod
-    def get_oauth_session_by_authorization_code(self, authorization_code, **kwargs):
+    async def get_oauth_session_by_authorization_code(self, authorization_code, **kwargs):
         """Get a oauth_session based on it's authorization_code and return it, else return None"""
 
     @abstractmethod
@@ -33,7 +33,7 @@ class DataStore(ABC):
         return oauth_session
 
     @abstractmethod
-    def save_oauth_session(self, oauth_session, **kwargs):
+    async def save_oauth_session(self, oauth_session, **kwargs):
         """Persist the current state of the oauth_session and return it"""
 
 class OAuthSession():

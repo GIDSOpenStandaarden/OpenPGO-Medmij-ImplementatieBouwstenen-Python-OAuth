@@ -13,9 +13,8 @@ from medmij_oauth.exceptions import (
 
 class Server():
     """Server class for all OAuth related stuff"""
-    @property
-    def ocl(self):
-        return self._get_ocl()
+    async def get_ocl(self):
+        return await self._get_ocl()
 
     def __init__(self, data_store=None, is_known_zg=None, zg_resource_available=None, get_ocl=None):
         assert is_known_zg is not None, "Can't instantiate Server without 'is_known_zg'"
@@ -32,10 +31,10 @@ class Server():
         self._is_known_zg = is_known_zg
         self._zg_resource_available = zg_resource_available
 
-    def create_oauth_session(self, request_params, **kwargs):
-        validation.validate_request_params(request_params, self.ocl)
+    async def create_oauth_session(self, request_params, **kwargs):
+        validation.validate_request_params(request_params, await self.get_ocl())
 
-        oauth_session = self.data_store.create_oauth_session(
+        oauth_session = await self.data_store.create_oauth_session(
             response_type=request_params.get('response_type'),
             client_id=request_params.get('client_id'),
             redirect_uri=request_params.get('redirect_uri'),
@@ -46,8 +45,9 @@ class Server():
 
         return oauth_session
 
-    def is_known_zg(self, oauth_session, **kwargs):
-        if not self._is_known_zg(**kwargs):
+    async def is_known_zg(self, oauth_session, **kwargs):
+        is_known = await self._is_known_zg(**kwargs)
+        if not is_known:
             raise OAuthException(
                 error_code=ERRORS.UNAUTHORIZED_CLIENT,
                 error_description='Unknown ZG',
@@ -55,16 +55,18 @@ class Server():
                 redirect=True
             )
 
-    def zg_resource_available(self, oauth_session=None, oauth_session_id=None, client_data=None, **kwargs):
+    async def zg_resource_available(self, oauth_session=None, oauth_session_id=None, client_data=None, **kwargs):
         if oauth_session is None:
-            oauth_session = self.data_store.get_oauth_session_by_id(oauth_session_id)
+            oauth_session = await self.data_store.get_oauth_session_by_id(oauth_session_id)
 
         _client_data = {
             "bsn": oauth_session.client_bsn,
             **client_data
         }
 
-        if not self._zg_resource_available(client_data=_client_data, **kwargs):
+        resource_available = await self._zg_resource_available(client_data=_client_data, **kwargs)
+
+        if not resource_available:
             raise OAuthException(
                 error_code=ERRORS.ACCESS_DENIED,
                 error_description='No such resource',
@@ -74,8 +76,8 @@ class Server():
 
         return True
 
-    def handle_auth_grant(self, oauth_session_id=None, authorization=False, **kwargs):
-        oauth_session = self.data_store.get_oauth_session_by_id(oauth_session_id, **kwargs)
+    async def handle_auth_grant(self, oauth_session_id=None, authorization=False, **kwargs):
+        oauth_session = await self.data_store.get_oauth_session_by_id(oauth_session_id, **kwargs)
 
         if oauth_session is None:
             raise ValueError('Not a valid oauth_session_id')
@@ -85,7 +87,7 @@ class Server():
                 'authorization_granted': False
             }, **kwargs)
 
-            oauth_session = self.data_store.save_oauth_session(oauth_session, **kwargs)
+            oauth_session = await self.data_store.save_oauth_session(oauth_session, **kwargs)
 
             raise OAuthException(
                 error_code=ERRORS.ACCESS_DENIED,
@@ -102,7 +104,7 @@ class Server():
             'authorization_code_expiration': authorization_code.expiration
         }, **kwargs)
 
-        oauth_session = self.data_store.save_oauth_session(oauth_session, **kwargs)
+        oauth_session = await self.data_store.save_oauth_session(oauth_session, **kwargs)
 
         return (oauth_session, self.get_authorization_code_redirect_url(oauth_session, authorization_code))
 
@@ -116,13 +118,13 @@ class Server():
 
         return f'{oauth_session.redirect_uri}?{urllib.parse.urlencode(query_dict)}'
 
-    def redeem_authorization_code(self, request_params, **kwargs):
-        oauth_session = self.data_store.get_oauth_session_by_authorization_code(
+    async def exchange_authorization_code(self, request_params, **kwargs):
+        oauth_session = await self.data_store.get_oauth_session_by_authorization_code(
             request_params.get('code'),
             **kwargs
         )
 
-        validation.validate_redeem_request(request_params, oauth_session)
+        validation.validate_exchange_request(request_params, oauth_session)
 
         access_token = tokens.create_token()
 
@@ -132,7 +134,7 @@ class Server():
             'access_token_expiration': access_token.expiration
         }, **kwargs)
 
-        oauth_session = self.data_store.save_oauth_session(oauth_session, **kwargs)
+        oauth_session = await self.data_store.save_oauth_session(oauth_session, **kwargs)
 
         return {
             'access_token': access_token.token,

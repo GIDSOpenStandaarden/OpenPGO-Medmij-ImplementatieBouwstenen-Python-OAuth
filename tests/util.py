@@ -4,15 +4,15 @@ import xml.etree.ElementTree as ET
 from medmij_oauth.server import parse_ocl
 from medmij_oauth.client import parse_zal
 
-def ret_false(**kwargs):
+async def ret_false(**kwargs):
     return False
 
-def ret_true(**kwargs):
+async def ret_true(**kwargs):
     return True
 
 def create_get_test_ocl():
     ocl = None
-    def get_test_ocl():
+    async def get_test_ocl():
         nonlocal ocl
         if ocl is not None:
             return ocl
@@ -29,7 +29,7 @@ from medmij_oauth.client.zal import parse_zal
 
 def create_get_test_zal():
     zal = None
-    def get_test_zal():
+    async def get_test_zal():
         nonlocal zal
         if zal is not None:
             return zal

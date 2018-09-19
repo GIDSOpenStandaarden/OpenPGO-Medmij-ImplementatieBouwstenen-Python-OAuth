@@ -11,7 +11,7 @@ async def get_select_zal(request):
     csrf_token = await csrf.generate_csrf_token(request)
 
     return render_template('select_zal.html', request, {
-        'zal': client.zal,
+        'zal': await client.get_zal(),
         'csrf_token': csrf_token
     })
 
@@ -20,9 +20,9 @@ async def post_select_zal(request):
     post = await request.post()
     client = request.app['client']
 
-    oauth_session = client.create_oauth_session(za_name=post.get('za'), db=request.db)
+    oauth_session = await client.create_oauth_session(za_name=post.get('za'), db=request.db)
 
-    url = client.create_auth_request_url(oauth_session)
+    url = await client.create_auth_request_url(oauth_session)
 
     return web.HTTPFound(url)
 
@@ -31,12 +31,12 @@ async def get_cb(request):
     client = request.app.get('client')
 
     try:
-        oauth_session = client.handle_auth_response(query, db=request.db)
+        oauth_session = await client.handle_auth_response(query, db=request.db)
     except OAuthException as ex:
         return render_template('error.html', request, {'error': ex})
 
     try:
-        oauth_session = await client.redeem_authorization_code(oauth_session, db=request.db)
+        oauth_session = await client.exchange_authorization_code(oauth_session, db=request.db)
     except OAuthException as ex:
         return  web.HTTPFound('/oauth/error?error=' + ex.error) #render_template('error.html', request, {'error': ex})
 

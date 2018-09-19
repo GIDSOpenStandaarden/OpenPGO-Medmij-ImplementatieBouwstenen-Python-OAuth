@@ -6,7 +6,7 @@ from ..data_store import (
 SESSIONS = {}
 
 class InMemoryDataStore(DataStore):
-    def create_oauth_session(self, response_type, client_id, redirect_uri, scope, state, **kwargs):
+    async def create_oauth_session(self, response_type, client_id, redirect_uri, scope, state, **kwargs):
         oauth_session = OAuthSession(
             response_type=response_type,
             client_id=client_id,
@@ -19,10 +19,10 @@ class InMemoryDataStore(DataStore):
 
         return oauth_session
 
-    def get_oauth_session_by_id(self, oauth_session_id, **kwargs):
+    async def get_oauth_session_by_id(self, oauth_session_id, **kwargs):
         return SESSIONS.get(oauth_session_id, None)
 
-    def get_oauth_session_by_authorization_code(self, authorization_code, **kwargs):
+    async def get_oauth_session_by_authorization_code(self, authorization_code, **kwargs):
         try:
             oauth_session = [
                 oauth_session for
@@ -37,7 +37,7 @@ class InMemoryDataStore(DataStore):
     def update_oauth_session(self, oauth_session, data, **kwargs):
         return super().update_oauth_session(oauth_session, data, **kwargs)
 
-    def save_oauth_session(self, oauth_session=None, **kwargs):
+    async def save_oauth_session(self, oauth_session=None, **kwargs):
         return oauth_session
 
     def __repr__(self):

@@ -28,8 +28,8 @@ def server(request):
         zg_resource_available=ret_true
     )
 
-
-def get_oauth_session(server):
+@mark.asyncio
+async def get_oauth_session(server):
     state = 'abcdef12345'
     redirect_uri = 'https://oauthclient.local/oauth/cb'
     scope = 1
@@ -44,15 +44,10 @@ def get_oauth_session(server):
         'response_type': response_type
     }
 
-    return server.create_oauth_session(valid_params)
+    return await server.create_oauth_session(valid_params)
 
-
-from medmij_oauth.server import (
-    Server,
-    InMemoryDataStore
-)
-
-def test_create_oauth_session_valid(server):
+@mark.asyncio
+async def test_create_oauth_session_valid(server):
     state = 'abcdef12345'
     redirect_uri = 'https://oauthclient.local/oauth/cb'
     scope = 1
@@ -67,7 +62,7 @@ def test_create_oauth_session_valid(server):
         'response_type': response_type
     }
 
-    oauth_session = server.create_oauth_session(valid_params)
+    oauth_session = await server.create_oauth_session(valid_params)
 
     assert oauth_session.state == valid_params['state']
     assert oauth_session.redirect_uri == valid_params['redirect_uri']
@@ -75,7 +70,8 @@ def test_create_oauth_session_valid(server):
     assert oauth_session.client_id == valid_params['client_id']
     assert oauth_session.response_type == valid_params['response_type']
 
-def test_create_oauth_session_invalid(server):
+@mark.asyncio
+async def test_create_oauth_session_invalid(server):
     state = 'abcdef12345'
     redirect_uri = 'https://oauthclient.local/oauth/cb'
     scope = 1
@@ -91,7 +87,7 @@ def test_create_oauth_session_invalid(server):
     }
 
     with raises(OAuthException) as ex_info:
-        server.create_oauth_session(invalid_params)
+        await server.create_oauth_session(invalid_params)
 
     assert ex_info.value.error == 'invalid_client' \
         and ex_info.value.error_description == 'client unknown'
@@ -105,38 +101,40 @@ def test_create_oauth_session_invalid(server):
     }
 
     with raises(OAuthException) as ex_info:
-        server.create_oauth_session(invalid_params)
+        await server.create_oauth_session(invalid_params)
 
     assert ex_info.value.error == 'unsupported_response_type' \
         and ex_info.value.error_description == 'Only "code" response_type supported'
 
-def test_handle_auth_grant(server):
-    oauth_session = get_oauth_session(server)
-    oauth_session, redirect_url = server.handle_auth_grant(oauth_session.id, True)
+@mark.asyncio
+async def test_handle_auth_grant(server):
+    oauth_session = await get_oauth_session(server)
+    oauth_session, redirect_url = await server.handle_auth_grant(oauth_session.id, True)
 
     assert oauth_session.authorization_granted
     assert oauth_session.authorization_code
     assert oauth_session.authorization_code_expiration > datetime.now()
     assert redirect_url == f'{oauth_session.redirect_uri}?code={oauth_session.authorization_code}&state={oauth_session.state}&expires_in=900&token_type=bearer'
 
-    oauth_session = get_oauth_session(server)
+    oauth_session = await get_oauth_session(server)
 
     with raises(OAuthException) as ex_info:
-        server.handle_auth_grant(oauth_session.id, False)
+        await server.handle_auth_grant(oauth_session.id, False)
 
     assert ex_info.value.error == 'access_denied'
     assert ex_info.value.error_description == 'Authorization denied'
     assert ex_info.value.redirect == True
 
     with raises(ValueError) as ex_info:
-        server.handle_auth_grant('fake', True)
+        await server.handle_auth_grant('fake', True)
 
     assert str(ex_info.value) == 'Not a valid oauth_session_id'
 
-def test_redeem_authorization_code_valid(server):
-    oauth_session = get_oauth_session(server)
+@mark.asyncio
+async def test_exchange_authorization_code_valid(server):
+    oauth_session = await get_oauth_session(server)
 
-    oauth_session, _ = server.handle_auth_grant(oauth_session.id, True)
+    oauth_session, _ = await server.handle_auth_grant(oauth_session.id, True)
 
     request_params = {
         'code': oauth_session.authorization_code,
@@ -145,18 +143,19 @@ def test_redeem_authorization_code_valid(server):
         'grant_type': 'authorization_code'
     }
 
-    _ = server.redeem_authorization_code(request_params)
+    _ = await server.exchange_authorization_code(request_params)
 
-    oauth_session = server.data_store.get_oauth_session_by_id(oauth_session.id)
+    oauth_session = await server.data_store.get_oauth_session_by_id(oauth_session.id)
 
     assert oauth_session.authorization_code is None
     assert oauth_session.access_token
     assert oauth_session.access_token_expiration > datetime.now()
 
-def test_redeem_authorization_code_invalid(server):
-    oauth_session = get_oauth_session(server)
+@mark.asyncio
+async def test_exchange_authorization_code_invalid(server):
+    oauth_session = await get_oauth_session(server)
 
-    oauth_session, _ = server.handle_auth_grant(oauth_session.id, True)
+    oauth_session, _ = await server.handle_auth_grant(oauth_session.id, True)
 
     request_params = {
         'code': oauth_session.authorization_code,
@@ -166,25 +165,25 @@ def test_redeem_authorization_code_invalid(server):
     }
 
     with raises(OAuthException) as ex_info:
-        server.redeem_authorization_code({**request_params, **{'code': 'fake'}})
+        await server.exchange_authorization_code({**request_params, **{'code': 'fake'}})
 
     assert ex_info.value.error == 'invalid_grant' \
         and ex_info.value.error_description == 'Invalid authorization token'
 
     with raises(OAuthException) as ex_info:
-        server.redeem_authorization_code({**request_params, **{'client_id': ''}})
+        await server.exchange_authorization_code({**request_params, **{'client_id': ''}})
 
     assert ex_info.value.error == 'invalid_client' \
         and ex_info.value.error_description == 'client_id not associated with this authorization_token'
 
     with raises(OAuthException) as ex_info:
-        server.redeem_authorization_code({**request_params, **{'redirect_uri': ''}})
+        await server.exchange_authorization_code({**request_params, **{'redirect_uri': ''}})
 
     assert ex_info.value.error == 'invalid_request' \
         and ex_info.value.error_description == 'Invalid redirect_uri'
 
     with raises(OAuthException) as ex_info:
-        server.redeem_authorization_code({**request_params, **{'grant_type': ''}})
+        await server.exchange_authorization_code({**request_params, **{'grant_type': ''}})
 
     assert ex_info.value.error == 'unsupported_grant_type' \
         and ex_info.value.error_description == '"authorization_code" in only supported grant_type'

@@ -29,20 +29,23 @@ def client(request):
         make_request=create_mock_make_request({})
     )
 
+@mark.asyncio
 @fixture
-def oauth_session(client):
-    za = client.zal['oauthserver.local@medmij']
+async def oauth_session(client):
+    za = (await client.get_zal())['oauthserver.local@medmij']
 
-    return client.create_oauth_session(za.naam)
+    return await client.create_oauth_session(za.naam)
 
-def test_create_oauth_session(client):
-    za = client.zal['oauthserver.local@medmij']
+@mark.asyncio
+async def test_create_oauth_session(client):
+    za = (await client.get_zal())['oauthserver.local@medmij']
 
-    oauth_session = client.create_oauth_session(za.naam)
+    oauth_session = await client.create_oauth_session(za.naam)
 
     assert oauth_session.za_name == za.naam
 
-def test_create_auth_request_url(client, oauth_session):
+@mark.asyncio
+async def test_create_auth_request_url(client, oauth_session):
     # python 3.6 has ordered dict keys so seralization of session is predictable
     # {
     #     'state': oauth_session.state,
@@ -54,21 +57,23 @@ def test_create_auth_request_url(client, oauth_session):
 
     req_url = f'https://oauthserver.local/oauth/authorize?state={oauth_session.state}&scope=1&response_type=code&client_id=oauthclient.local&redirect_uri=https%3A%2F%2Foauthclient.local%2Foauth%2Fcb'
 
-    assert client.create_auth_request_url(oauth_session) == req_url
+    assert (await client.create_auth_request_url(oauth_session)) == req_url
 
-def test_handle_auth_response_valid(client, oauth_session):
+@mark.asyncio
+async def test_handle_auth_response_valid(client, oauth_session):
     response = {
         'code': 'SplxlOBeZQQYbYS6WxSbIA',
         'state': oauth_session.state
     }
 
-    _oauth_session = client.handle_auth_response(response)
+    _oauth_session = await client.handle_auth_response(response)
 
     assert _oauth_session
     assert _oauth_session.authorization_code == response['code']
     assert _oauth_session.authorized
 
-def test_handle_auth_response_invalid(client, oauth_session):
+@mark.asyncio
+async def test_handle_auth_response_invalid(client, oauth_session):
     # code not in response
     response = {
         'code': '',
@@ -76,7 +81,7 @@ def test_handle_auth_response_invalid(client, oauth_session):
     }
 
     with raises(ValueError) as ex_info:
-        client.handle_auth_response(response)
+        await client.handle_auth_response(response)
 
     assert "Missing param 'code' in auth response" in str(ex_info.value)
 
@@ -87,7 +92,7 @@ def test_handle_auth_response_invalid(client, oauth_session):
     }
 
     with raises(ValueError) as ex_info:
-        client.handle_auth_response(response)
+        await client.handle_auth_response(response)
 
     assert "Missing param 'state' in auth response" in str(ex_info.value)
 
@@ -98,7 +103,7 @@ def test_handle_auth_response_invalid(client, oauth_session):
     }
 
     with raises(ValueError) as ex_info:
-        client.handle_auth_response(response)
+        await client.handle_auth_response(response)
 
     assert 'No oauth_session found!' in str(ex_info.value)
 
@@ -109,7 +114,7 @@ def test_handle_auth_response_invalid(client, oauth_session):
     }
 
     with  raises(OAuthException) as ex_info:
-        client.handle_auth_response(response)
+        await client.handle_auth_response(response)
 
     assert ex_info.value.error == 'access_denied'
     assert ex_info.value.error_description == 'No such resource'
@@ -121,38 +126,38 @@ def test_handle_auth_response_invalid(client, oauth_session):
     }
 
     with  raises(ValueError) as ex_info:
-        client.handle_auth_response(response)
+        await client.handle_auth_response(response)
 
     err = f'Unknown error: \'random_string\''
 
     assert err in str(ex_info.value)
 
 @mark.asyncio
-async def test_redeem_authorization_code_valid(client, oauth_session):
+async def test_exchange_authorization_code_valid(client, oauth_session):
     response = {
         'code': 'SplxlOBeZQQYbYS6WxSbIA',
         'state': oauth_session.state
     }
 
-    oauth_session = client.handle_auth_response(response)
+    oauth_session = await client.handle_auth_response(response)
 
     client.make_request = create_mock_make_request({
         'access_token': 'abcd1234',
         'token_type': 'bearer'
     })
 
-    oauth_session = await client.redeem_authorization_code(oauth_session)
+    oauth_session = await client.exchange_authorization_code(oauth_session)
 
     assert oauth_session.access_token == 'abcd1234'
 
 @mark.asyncio
-async def test_redeem_authorization_code_invalid(client, oauth_session):
+async def test_exchange_authorization_code_invalid(client, oauth_session):
     response = {
         'code': 'SplxlOBeZQQYbYS6WxSbIA',
         'state': oauth_session.state
     }
 
-    oauth_session = client.handle_auth_response(response)
+    oauth_session = await client.handle_auth_response(response)
 
     client.make_request = create_mock_make_request({
         'access_token': '',
@@ -160,7 +165,7 @@ async def test_redeem_authorization_code_invalid(client, oauth_session):
     })
 
     with raises(ValueError) as ex_info:
-        oauth_session = await client.redeem_authorization_code(oauth_session)
+        oauth_session = await client.exchange_authorization_code(oauth_session)
 
     assert 'No access token in response' in str(ex_info.value)
 
@@ -170,7 +175,7 @@ async def test_redeem_authorization_code_invalid(client, oauth_session):
     })
 
     with raises(ValueError) as ex_info:
-        oauth_session = await client.redeem_authorization_code(oauth_session)
+        oauth_session = await client.exchange_authorization_code(oauth_session)
 
     assert 'No token_type present in response' in str(ex_info.value)
 

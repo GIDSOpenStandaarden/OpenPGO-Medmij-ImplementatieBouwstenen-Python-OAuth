@@ -5,14 +5,13 @@ from . import validation
 from .data_store import DataStore
 
 class Client:
-    @property
-    def zal(self):
-        return self._get_zal()
+    async def get_zal(self):
+        return await self._get_zal()
 
     def __init__(self, data_store=None, get_zal=None, client_info=None, make_request=None):
         assert get_zal is not None, "Can't instantiate Client without 'get_zal'"
         assert make_request is not None, "Can't instantiate Client without 'make_request'"
-        assert client_info, "Can't instantiate Client without 'client_info'"
+        assert client_info is not None, "Can't instantiate Client without 'client_info'"
 
         if not issubclass(data_store.__class__, DataStore):
             raise ValueError(
@@ -24,10 +23,10 @@ class Client:
         self.make_request = make_request
         self._get_zal = get_zal
 
-    def create_oauth_session(self, za_name, **kwargs):
-        return self.data_store.create_oauth_session(za_name=za_name, **kwargs)
+    async def create_oauth_session(self, za_name, **kwargs):
+        return await self.data_store.create_oauth_session(za_name=za_name, **kwargs)
 
-    def create_auth_request_url(self, oauth_session):
+    async def create_auth_request_url(self, oauth_session):
         request_dict = {
             'state': oauth_session.state,
             'scope': 1,
@@ -36,15 +35,15 @@ class Client:
             'redirect_uri': self.redirect_uri
         }
 
-        za = self.zal[oauth_session.za_name]
+        za = (await self.get_zal())[oauth_session.za_name]
         query_params = urllib.parse.urlencode(request_dict)
 
         return f'{za.authorization_endpoint}?{query_params}'
 
-    def handle_auth_response(self, params, **kwargs):
+    async def handle_auth_response(self, params, **kwargs):
         validation.validate_auth_response(params)
 
-        oauth_session = self.data_store.get_oauth_session_by_state(params['state'], **kwargs)
+        oauth_session = await self.data_store.get_oauth_session_by_state(params['state'], **kwargs)
 
         if oauth_session is None:
             raise ValueError('No oauth_session found!')
@@ -54,12 +53,12 @@ class Client:
             'authorized': True
         }, **kwargs)
 
-        oauth_session = self.data_store.save_oauth_session(oauth_session, **kwargs)
+        oauth_session = await self.data_store.save_oauth_session(oauth_session, **kwargs)
 
         return oauth_session
 
-    async def redeem_authorization_code(self, oauth_session, **kwargs):
-        za = self.zal[oauth_session.za_name]
+    async def exchange_authorization_code(self, oauth_session, **kwargs):
+        za = (await self.get_zal())[oauth_session.za_name]
 
         response = await self.make_request(method='POST', url=za.token_endpoint, body={
             'grant_type': 'authorization_code',
@@ -75,12 +74,12 @@ class Client:
             'authorization_code': None
         }, **kwargs)
 
-        oauth_session = self.data_store.save_oauth_session(oauth_session, **kwargs)
+        oauth_session = await self.data_store.save_oauth_session(oauth_session, **kwargs)
 
         return oauth_session
 
     def __repr__(self):
-        return f'Client(data_store={repr(self.data_store)}, get_zal={self._get_zal.__name__})'
+        return f'Client(data_store={repr(self.data_store)}, get_zal={self._get_zal.__name__}, client_info={self.client_info}, make_request={self.make_request.__name__})'
 
     def __getattr__(self, attr):
         try:

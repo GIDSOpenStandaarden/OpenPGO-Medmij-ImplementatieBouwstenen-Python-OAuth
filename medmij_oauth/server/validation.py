@@ -115,7 +115,7 @@ def validate_request_params(request_params, ocl):
             redirect=True
         )
 
-def validate_redeem_request(request_params, oauth_session):
+def validate_exchange_request(request_params, oauth_session):
     if oauth_session is None:
         raise OAuthException(
             error_code=ERRORS.INVALID_GRANT,

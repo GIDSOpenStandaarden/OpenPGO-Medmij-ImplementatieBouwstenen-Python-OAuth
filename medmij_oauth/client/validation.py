@@ -18,7 +18,7 @@ def validate_auth_response(data):
 
 def validate_access_token_response(data, oauth_session):
     if oauth_session.access_token:
-        raise ValueError('Access token already redeemed')
+        raise ValueError('Access token already exchanged')
 
     if data.get("error"):
         return handle_error(data)

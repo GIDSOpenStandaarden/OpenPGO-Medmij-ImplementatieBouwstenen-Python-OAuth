@@ -1,0 +1,21 @@
+body {
+    padding: 0 50px;
+}
+
+div.document {
+    width: 100%;
+}
+
+div.body {
+    min-width: 450px;
+    max-width: 1100px;
+    margin: auto;
+}
+
+div.sphinxsidebar {
+    width: 275px;
+}
+
+div.bodywrapper {
+    margin: 0 0 0 275px;
+}

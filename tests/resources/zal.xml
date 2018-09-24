@@ -69,7 +69,7 @@
             <Zorgaanbiedernaam>oauthserver.local@medmij</Zorgaanbiedernaam>
             <Gegevensdiensten>
                 <Gegevensdienst>
-                    <GegevensdienstId>38</GegevensdienstId>
+                    <GegevensdienstId>1</GegevensdienstId>
                     <AuthorizationEndpoint>
                         <AuthorizationEndpointuri>https://oauthserver.local/oauth/authorize</AuthorizationEndpointuri>
                     </AuthorizationEndpoint>

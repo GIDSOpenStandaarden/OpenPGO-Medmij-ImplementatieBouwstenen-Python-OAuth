@@ -62,11 +62,11 @@ def validate_redirect_uri(url='', client_hostname=''):
 def is_expired(expiration_time=datetime.now()):
     return datetime.now() >= expiration_time
 
-def validate_request_params(request_params, ocl):
-    redirect_uri = request_params.get('redirect_uri', None)
-    response_type = request_params.get('response_type', None)
-    client_id = request_params.get('client_id', None)
-    scope = request_params.get('scope', None)
+def validate_request_parameters(request_parameters, ocl):
+    redirect_uri = request_parameters.get('redirect_uri', None)
+    response_type = request_parameters.get('response_type', None)
+    client_id = request_parameters.get('client_id', None)
+    scope = request_parameters.get('scope', None)
 
 
     if not client_id:
@@ -107,15 +107,24 @@ def validate_request_params(request_params, ocl):
             redirect=True
         )
 
-    if int(scope) != 1:
+    # TODO implement match on scope (gegevensdienst_id) of current service
+    try:
+        if int(scope) >= 8:
+            raise OAuthException(
+                error_code=ERRORS.INVALID_SCOPE,
+                error_description='Scope should be integer <= 8',
+                base_redirect_url=redirect_uri,
+                redirect=True
+            )
+    except Exception:
         raise OAuthException(
             error_code=ERRORS.INVALID_SCOPE,
-            error_description='Only a scope of 1 is allowed',
+            error_description='Scope should be integer <= 8',
             base_redirect_url=redirect_uri,
             redirect=True
         )
 
-def validate_exchange_request(request_params, oauth_session):
+def validate_exchange_request(request_parameters, oauth_session):
     if oauth_session is None:
         raise OAuthException(
             error_code=ERRORS.INVALID_GRANT,
@@ -124,10 +133,10 @@ def validate_exchange_request(request_params, oauth_session):
 
     # TODO what to do with client_secret?
 
-    #client_secret = request_params.get('client_secret')
-    grant_type = request_params.get('grant_type')
-    client_id = request_params.get('client_id')
-    redirect_uri = request_params.get('redirect_uri')
+    #client_secret = request_parameters.get('client_secret')
+    grant_type = request_parameters.get('grant_type')
+    client_id = request_parameters.get('client_id')
+    redirect_uri = request_parameters.get('redirect_uri')
 
     if oauth_session.client_id != client_id or client_id is None:
         raise OAuthException(

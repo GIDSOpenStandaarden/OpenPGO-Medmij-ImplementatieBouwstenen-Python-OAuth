@@ -11,5 +11,12 @@ from .data_store_implementations import (
 )
 
 from .zal import (
-    parse_zal
+    parse_zal,
+    ZAL,
+    Zorgaanbieder,
+    Gegevensdienst
+)
+
+from .gnl import (
+    parse_gnl
 )

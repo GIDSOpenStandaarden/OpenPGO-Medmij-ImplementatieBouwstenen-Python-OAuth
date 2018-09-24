@@ -1,9 +1,5 @@
 '''
-    Module for handling OAuth related _ERRORS
-
-    references:
-    https://www.oauth.com/oauth2-servers/authorization/the-authorization-response/
-    https://tools.ietf.org/html/rfc6749#section-5.2
+    Module for handling OAuth related errors
 '''
 import urllib.parse
 import json
@@ -16,6 +12,15 @@ from enum import (
 from http import HTTPStatus
 
 class ERRORS(Enum):
+    """
+        Error codes enum to be used as error_code for instantiation of OAuthException
+
+        Usage example:
+
+        .. code:: python
+
+            raise OAuthException(ERRORS.UNAUTHORIZED_CLIENT, 'no such resource', ...)
+    """
     INVALID_REQUEST = auto()
     ACCESS_DENIED = auto()
     UNAUTHORIZED_CLIENT = auto()
@@ -71,12 +76,51 @@ _ERRORS = {
 }
 
 def lookup_error_code(error):
+    """
+        Lookup error code by text.
+        When an oauth client receives a error response, it can reproduce the exception by looking up the error code with the 'error' query param that it received.
+
+        Raises a ValueError if the error passed to it is unknown.
+
+        Example:
+
+        .. code:: python
+
+            error = query_params.get('error')
+            error_description = query_params.get('error_description')
+
+            raise OAuthException(error_code=lookup_error_code(error), error_description=error_description)
+
+    """
     try:
         return [code for code, value in _ERRORS.items() if value['error'] == error][0]
     except IndexError:
         raise ValueError(f'Unknown error: \'{error}\'')
 
 class OAuthException(BaseException):
+    """
+    OAuthException class, represents a oauth error as described in `rfc6749 <https://tools.ietf.org/html/rfc6749#section-4.1.1>`__
+
+    :type error_code: int, `error code <#medmij_oauth.exceptions.ERRORS>`__
+    :param error_code: Int that represents a type of error, will be looked up in the ERRORS enum
+    :type error_description: string
+    :param error_description: Human readable description of the error e.g. 'no such resource'
+    :type redirect: bool
+    :param redirect: Indication if on handling of the exception the user should be redirected back to the client application of if the error should be rendered to the screen
+    :type base_redirect_url: string (optional)
+    :param base_redirect_url: The base of the redirect url (on redirection the error params are appended to the base_redirect_url as a query string)
+
+    Usage examples:
+
+    .. code:: python
+
+        raise OAuthException(ERRORS.INVALID_REQUEST, error_description='Invalid redirect url', redirect=False)
+
+    .. code:: python
+
+        raise OAuthException(ERRORS.UNAUTHORIZED_CLIENT, error_description='No such resource', redirect=True, base_redirect_url='https://oauthclient.com')
+
+    """
     def __init__(
             self,
             error_code,
@@ -95,6 +139,16 @@ class OAuthException(BaseException):
         self.base_redirect_url = base_redirect_url
 
     def get_redirect_url(self):
+        """
+            Return redirect url to which the end user should be redirected.
+            The redirect_url constists of two parts, self.base_redirect_url and a query string that contains the error and error description
+
+            Raises a Exception if self.direct != True or if self.base_redirect_url is not set.
+
+            e.g.
+
+            https://oauthclient.com/cb/?error=unauthorized_client&error_description=No%20such%20resource
+        """
         if not self.redirect or not self.base_redirect_url:
             raise Exception('Not allowed to get redirect_url if redirect \
                 is False or base_redirect_url is not set')
@@ -107,9 +161,24 @@ class OAuthException(BaseException):
         return f'{self.base_redirect_url}?{error_query_string}'
 
     def get_json(self):
+        """
+        Return json representation of the exception that is targeted at the end user
+        Included properties are 'error' and 'error_description'
+
+        .. code:: python
+
+            {
+                'error': 'unauthorized_client',
+                'error_description': 'no such resource'
+            }
+        """
         return json.dumps(self.get_dict())
 
     def get_dict(self):
+        """
+        Return dict representation of the exception that is targeted at the end user.
+        Included properties are 'error' and 'error_description'.
+        """
         return {
             'error': self.error,
             'error_description': self.error_description

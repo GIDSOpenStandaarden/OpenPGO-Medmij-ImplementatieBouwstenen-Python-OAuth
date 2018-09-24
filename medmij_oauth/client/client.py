@@ -5,8 +5,21 @@ from . import validation
 from .data_store import DataStore
 
 class Client:
-    async def get_zal(self):
-        return await self._get_zal()
+    """
+    Class to assist in the OAuth clientside flow
+
+    :type data_store: `Datastore <medmij_oauth.client.html#datastore>`__
+    :param data_store: Must be subclass of DataStore, handles data interaction with OAuthSessions see `Datastore <medmij_oauth.client.html#datastore>`__ for more info.
+
+    :type get_zal: async function
+    :param get_zal: Function that returns a `ZAL <#medmij_oauth.client.ZAL>`__
+
+    :type client_info: dict
+    :param client_info: Dict containing info about the client application (client_id and redirect_url for authorization request responses)
+
+    :type make_request: async function
+    :param make_request: Function that makes a post request. Should have signature (url, body)->dict. Used to make a authorization exchange request to the oauth server.
+    """
 
     def __init__(self, data_store=None, get_zal=None, client_info=None, make_request=None):
         assert get_zal is not None, "Can't instantiate Client without 'get_zal'"
@@ -23,10 +36,40 @@ class Client:
         self.make_request = make_request
         self._get_zal = get_zal
 
-    async def create_oauth_session(self, za_name, **kwargs):
-        return await self.data_store.create_oauth_session(za_name=za_name, **kwargs)
+    async def get_zal(self):
+        """Return the ZAL returned by the get_zal function supplied in instantiation of Client object"""
+        return await self._get_zal()
+
+    async def create_oauth_session(self, za_name, gegevensdienst_id, **kwargs):
+        """
+        Create and return a new OAuthSession to start the oauth flow. Add the zorggebruikers choice of zorgaanbieder gegevensdienst. `(2) <index.html#id2>`__
+
+        :type za_name: string
+        :param za_name: Name of zorgaanbieder chosen by the zorggebruiker.
+
+        :type gegevensdienst_id: string
+        :param gegevensdienst_id: Id of the gegevensdienst chosen by the zorggebruiker
+
+        :type \*\*args: various
+        :param \*\*args: Keyword arguments get passed on to the data_store.create_oauth_session function, e.g. db object
+
+        Returns:
+            `OAuthSession <#oauthsession>`__: The created OAuthSession.
+
+        """
+        return await self.data_store.create_oauth_session(za_name=za_name, gegevensdienst_id=gegevensdienst_id, **kwargs)
 
     async def create_auth_request_url(self, oauth_session):
+        """
+        Build and return authorization request url `(2) <index.html#id2>`__
+
+        :type oauth_session: `OAuthSession <#oauthsession>`__
+        :param oauth_session: OAuthSession for current zorggebruiker
+
+        Returns:
+            request_url: string
+        """
+
         request_dict = {
             'state': oauth_session.state,
             'scope': 1,
@@ -36,31 +79,41 @@ class Client:
         }
 
         za = (await self.get_zal())[oauth_session.za_name]
-        query_params = urllib.parse.urlencode(request_dict)
+        gegevensdienst = za.gegevensdiensten[oauth_session.gegevensdienst_id]
+        query_parameters = urllib.parse.urlencode(request_dict)
 
-        return f'{za.authorization_endpoint}?{query_params}'
+        return f'{gegevensdienst.authorization_endpoint}?{query_parameters}'
 
-    async def handle_auth_response(self, params, **kwargs):
-        validation.validate_auth_response(params)
+    async def handle_auth_response(self, parameters, **kwargs):
+        """
+        Handles the response to the authorization request. (`10 <index.html#id10>`__, `11 <index.html#id11>`__)
 
-        oauth_session = await self.data_store.get_oauth_session_by_state(params['state'], **kwargs)
+        The response parameters are validated and an appropriate `OAuthException <medmij_oauth.exceptions.html#oauthexception>`__ is raised if supplied parameters are not valid
+        """
+        validation.validate_auth_response(parameters)
+
+        oauth_session = await self.data_store.get_oauth_session_by_state(parameters['state'], **kwargs)
 
         if oauth_session is None:
             raise ValueError('No oauth_session found!')
 
-        oauth_session = self.data_store.update_oauth_session(oauth_session, {
-            'authorization_code': params['code'],
-            'authorized': True
-        }, **kwargs)
+        oauth_session.authorization_code = parameters['code']
+        oauth_session.authorized = True
 
         oauth_session = await self.data_store.save_oauth_session(oauth_session, **kwargs)
 
         return oauth_session
 
     async def exchange_authorization_code(self, oauth_session, **kwargs):
+        """
+        Make a request to a oauth server with the supplied make_request function on instantiation of the Client, exchange the received authorization code for an access token and update the oauth_session. `(12) <index.html#id12>`__
+
+        :type oauth_session: `OAuthSession <#oauthsession>`__
+        :param oauth_session: Authorized oauth session of which to exchange the authorization code
+        """
         za = (await self.get_zal())[oauth_session.za_name]
 
-        response = await self.make_request(method='POST', url=za.token_endpoint, body={
+        response = await self.make_request(url=za.token_endpoint, body={
             'grant_type': 'authorization_code',
             'code': oauth_session.authorization_code,
             'redirect_uri': self.redirect_uri,
@@ -69,10 +122,8 @@ class Client:
 
         validation.validate_access_token_response(response, oauth_session)
 
-        oauth_session = self.data_store.update_oauth_session(oauth_session, {
-            'access_token': response['access_token'],
-            'authorization_code': None
-        }, **kwargs)
+        oauth_session.access_token = response['access_token']
+        oauth_session.authorization_code = None
 
         oauth_session = await self.data_store.save_oauth_session(oauth_session, **kwargs)
 

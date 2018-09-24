@@ -3,34 +3,18 @@ import datetime
 from abc import ABC, abstractmethod
 
 class DataStore(ABC):
-    """Abstract Class for data access, subclass this class and implement it's methods"""
+    """Abstract Class for interactions with/manipulation of `OAuthSessions <#oauthsession>`__, subclass this class and implement it's methods"""
     @abstractmethod
     async def create_oauth_session(self, response_type, client_id, redirect_uri, scope, state, **kwargs):
         """Create a new oauth_session, persist the oauth_session and return it."""
 
     @abstractmethod
     async def get_oauth_session_by_id(self, oauth_session_id, **kwargs):
-        """Get a oauth_session based on it's id and return it, else return None"""
+        """Get a oauth_session based on its id and return it, else return None"""
 
     @abstractmethod
     async def get_oauth_session_by_authorization_code(self, authorization_code, **kwargs):
-        """Get a oauth_session based on it's authorization_code and return it, else return None"""
-
-    @abstractmethod
-    def update_oauth_session(self, oauth_session, data, **kwargs):
-        """
-        Update the oauth_session with de keys and values contained
-        in the data dict and return the updated oauth_session
-        """
-        for key, value in data.items():
-            try:
-                getattr(oauth_session, key)
-            except AttributeError:
-                continue
-
-            setattr(oauth_session, key, value)
-
-        return oauth_session
+        """Get a oauth_session based on its authorization_code and return it, else return None"""
 
     @abstractmethod
     async def save_oauth_session(self, oauth_session, **kwargs):
@@ -45,7 +29,6 @@ class OAuthSession():
         self.state = state
         self.redirect_uri = redirect_uri
         self.created_at = datetime.datetime.now()
-        self.relay_state = str(uuid.uuid4())
         self.authorization_code = None
         self.authorization_code_expiration = -1
         self.authorization_granted = False

@@ -10,7 +10,7 @@ async def get_select_zal(request):
 
     csrf_token = await csrf.generate_csrf_token(request)
 
-    return render_template('select_zal.html', request, {
+    return render_template('select_gd.html', request, {
         'zal': await client.get_zal(),
         'csrf_token': csrf_token
     })
@@ -20,7 +20,9 @@ async def post_select_zal(request):
     post = await request.post()
     client = request.app['client']
 
-    oauth_session = await client.create_oauth_session(za_name=post.get('za'), db=request.db)
+    za_name, gegevensdienst_id = post.get('za').split("::")
+
+    oauth_session = await client.create_oauth_session(za_name=za_name, gegevensdienst_id=gegevensdienst_id, db=request.db)
 
     url = await client.create_auth_request_url(oauth_session)
 

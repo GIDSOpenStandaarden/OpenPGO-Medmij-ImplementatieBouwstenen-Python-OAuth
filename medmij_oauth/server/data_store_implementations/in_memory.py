@@ -34,9 +34,6 @@ class InMemoryDataStore(DataStore):
 
         return oauth_session
 
-    def update_oauth_session(self, oauth_session, data, **kwargs):
-        return super().update_oauth_session(oauth_session, data, **kwargs)
-
     async def save_oauth_session(self, oauth_session=None, **kwargs):
         return oauth_session
 

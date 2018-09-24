@@ -18,16 +18,18 @@ class OAuthSession(Base):
     state = Column(Text)
     scope = Column(Text)
     za_name = Column(Text)
+    gegevensdienst_id = Column(Text)
     authorization_code = Column(Text)
     authorized = Column(Boolean)
     access_token = Column(Text)
     created_at = Column(DateTime, nullable=False)
 
-    def __init__(self, za_name, state):
+    def __init__(self, za_name, gegevensdienst_id, state):
         self.id = str(uuid.uuid4())
         self.state = state
-        self.scope = '1'
+        self.scope = gegevensdienst_id
         self.za_name = za_name
+        self.gegevensdienst_id = gegevensdienst_id
         self.authorization_code = None
         self.authorized = False
         self.access_token = None

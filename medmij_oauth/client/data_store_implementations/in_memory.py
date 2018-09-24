@@ -7,10 +7,12 @@ from ..data_store import (
 SESSIONS = {}
 
 class InMemoryDataStore(DataStore):
-    async def create_oauth_session(self, za_name, **kwargs):
+    async def create_oauth_session(self, za_name, gegevensdienst_id, **kwargs):
         oauth_session = OAuthSession(
             state=secrets.token_hex(16),
-            za_name=za_name
+            za_name=za_name,
+            gegevensdienst_id=gegevensdienst_id,
+            scope=gegevensdienst_id
         )
 
         SESSIONS[oauth_session.id] = oauth_session
@@ -31,9 +33,6 @@ class InMemoryDataStore(DataStore):
             return None
 
         return oauth_session
-
-    def update_oauth_session(self, oauth_session, data, **kwargs):
-        return super().update_oauth_session(oauth_session, data, **kwargs)
 
     async def save_oauth_session(self, oauth_session=None, **kwargs):
         return oauth_session

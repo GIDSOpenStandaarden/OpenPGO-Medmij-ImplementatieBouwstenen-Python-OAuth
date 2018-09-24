@@ -77,11 +77,13 @@
                     <input type="hidden" name="csrf_token" value="{{csrf_token}}">
                     <div class="c-form-row">
                         <label class="c-label" for="za">
-                            Selecteer zorgaanbieder
+                            Selecteer gegevensdienst
                         </label>
                         <select name="za" id="za">
                             {% for za in zal %}
-                            <option value="{{za.naam}}">{{za.naam}}</option>
+                                {% for gegevensdienst in za.gegevensdiensten.values() %}
+                                    <option value="{{za.naam}}::{{gegevensdienst.id}}">{{za.naam}} - {{gegevensdienst.display_name}}</option>
+                                {% endfor %}
                             {% endfor %}
                         </select>
                     </div>
@@ -91,5 +93,15 @@
             </div>
         </div>
     </section>
+    <div>
+        {% for za in zal %}
+            {% for gegevensdienst in za.gegevensdiensten.values() %}
+            {% for a in gegevensdienst.endpoints() %}
+            
+                {{a}}<br>
+            {% endfor %}
+            {% endfor %}
+    {% endfor %}
+    </div>
 </body>
 </html>

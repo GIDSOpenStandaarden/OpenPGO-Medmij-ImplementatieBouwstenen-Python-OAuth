@@ -21,10 +21,9 @@ class OAuthSession(Base):
     state = Column(Text)
     redirect_uri = Column(Text)
     created_at = Column(DateTime, nullable=False)
-    relay_state = Column(Text, unique=True, nullable=True)
     authorization_code = Column(Text, unique=True, nullable=True)
     authorization_code_expiration = Column(DateTime, nullable=False)
-    authorization = Boolean()
+    authorization_granted = Boolean()
     access_token = Column(Text, unique=True)
     access_token_expiration = Column(DateTime, nullable=False)
     client_bsn = Column(Text)
@@ -37,9 +36,8 @@ class OAuthSession(Base):
         self.state = state
         self.redirect_uri = redirect_uri
         self.created_at = datetime.datetime.now()
-        self.relay_state = str(uuid.uuid4())
         self.authorization_code = None
         self.authorization_code_expiration = datetime.datetime.now()
-        self.authorization = False
+        self.authorization_granted = False
         self.access_token = None
         self.access_token_expiration = datetime.datetime.now()

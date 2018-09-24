@@ -79,7 +79,6 @@ def setup_routes(app):
 def setup_server(app):
     server = Server(
         data_store=SQLAlchemyDataStore(),
-        is_known_zg=ret_true,
         zg_resource_available=ret_true,
         get_ocl=create_get_test_ocl()
     )

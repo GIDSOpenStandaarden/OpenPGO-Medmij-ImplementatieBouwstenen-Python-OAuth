@@ -9,54 +9,91 @@ class Systeemrol:
         return f'<Systeemrol: systeemrolcode={self.systeemrolcode}, resource_endpoint={self.resource_endpoint}>'
 
 class Gegevensdienst:
-    def __init__(self, gd_dict, parent_name='Onbekend'):
+    """
+    Python object that represents a Gegevensdienst
+
+    :type gegevensdienst_dict: dict
+    :param gegevensdienst_dict: Dict with information of gegevensdienst.
+
+    :type parent_name: string
+    :param parent_name: Name of zorgaanbieder where this gegevensdienst belongs to.
+
+    :type gnl: dict
+    :param gnl: dict containing gegevensdienstnamen supplied by the medmij_oauth.client.parse_gnl function.
+    """
+    def __init__(self, gegevensdienst_dict, gnl, parent_name='Onbekend'):
         self._parent_name = parent_name
-        self.id = gd_dict['id']
-        self.token_endpoints = gd_dict['token_endpoints']
-        self.authorization_endpoints = gd_dict['authorization_endpoints']
-        self.systeemrollen = [Systeemrol(systeemrol) for systeemrol in gd_dict['systeemrollen']]
+        self.id = gegevensdienst_dict['id']
+        self.token_endpoints = gegevensdienst_dict['token_endpoints']
+        self.authorization_endpoints = gegevensdienst_dict['authorization_endpoints']
+        self.systeemrollen = [Systeemrol(systeemrol) for systeemrol in gegevensdienst_dict['systeemrollen']]
+        self.display_name = gnl[gegevensdienst_dict['id']]
 
     @property
     def token_endpoint(self):
+        """ Return the first token endpoint of this gegevensdienst"""
         return self.token_endpoints[0]
 
     @property
     def authorization_endpoint(self):
+        """ Return the first authorization endpoint of this gegevensdienst"""
         return self.authorization_endpoints[0]
 
-    __slots__ = ('_parent_name', 'id', 'token_endpoints', 'authorization_endpoints', 'systeemrollen')
+    def endpoints(self):
+        """ Return generator that itterates over all endpoint couples (self.authorization_endpoints[i], self.token_endpoints[i])"""
+        return ((self.authorization_endpoints[i], self.token_endpoints[i]) for i in range(len(self.token_endpoints)))
+
+    __slots__ = ('_parent_name', 'id', 'token_endpoints', 'authorization_endpoints', 'systeemrollen', 'display_name')
 
     def __repr__(self):
         return f'<Gegevensdient: {self.id} ({self._parent_name})>'
 
 class Zorgaanbieder:
-    def __init__(self, za_dict):
+    """
+    Python object that represents a Zorgaanbieder
+
+    :type zal_list: list
+    :param zal_list: List containing dicts with zorgaanbieder information
+
+    :type gnl: dict
+    :param gnl: dict containing gegevensdienstnamen supplied by the medmij_oauth.client.parse_gnl functio
+    """
+    def __init__(self, za_dict, gnl):
         self.naam = za_dict['naam']
-        self.gegevensdiensten = [Gegevensdienst(gegevensdient, self.naam) for gegevensdient in za_dict['gegevensdiensten']]
+        self.gegevensdiensten = {gegevensdient['id']:Gegevensdienst(gegevensdient, gnl, parent_name=self.naam) for gegevensdient in za_dict['gegevensdiensten']}
 
-    __slots__ = ('naam', 'gegevensdiensten')
-
-    @property
-    def token_endpoint(self):
-        return self.gegevensdiensten[0].token_endpoint
-
-    @property
-    def authorization_endpoint(self):
-        return self.gegevensdiensten[0].authorization_endpoint
+    __slots__ = ('naam', 'gegevensdiensten', 'gnl')
 
     def __repr__(self):
         return f'<Zorgaanbieder: {self.naam}>'
 
 class ZAL:
+    """
+    Python object that represents a ZAL (`Zorgaanbiederslijst <https://afsprakenstelsel.medmij.nl/display/PUBLIC/XML-schema%27s?preview=/22348206/22348210/MedMij_Zorgaanbiederslijst.xsd>`__)
+
+    Don't instantiate this class manually, use `parse_zal <#medmij_oauth.client.parse_zal>`__ instead
+
+    :type zal_list: list
+    :param zal_list: List containing dicts with za information
+
+    :type gnl: dict
+    :param gnl: dict containing gegevensdienstnamen supplied by the medmij_oauth.client.parse_gnl function
+    """
     _zorgaanbieders = {}
 
-    def __init__(self, zal_dict):
-        self._zorgaanbieders = dict((zorgaanbieder["naam"], Zorgaanbieder(zorgaanbieder)) for zorgaanbieder in zal_dict)
-
+    def __init__(self, zal_list, gnl):
+        self._zorgaanbieders = dict((zorgaanbieder["naam"], Zorgaanbieder(zorgaanbieder, gnl)) for zorgaanbieder in zal_list)
+        self.gnl = gnl
     def list_zal_names(self):
+        """
+            Get a list of zorgaanbieder names.
+        """
         return list(self._zorgaanbieders.keys())
 
     def items(self):
+        """
+            Get a list of all zorgaanbieders in ZAL.
+        """
         return self._zorgaanbieders.items()
 
     def __getitem__(self, item):
@@ -72,18 +109,32 @@ class ZAL:
     def __repr__(self):
         return f'<ZAL ({len(self._zorgaanbieders)} zorgaanbieders>)'
 
-class XMLIdentifiers:
-    ZORGAANBIEDER = '{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/release2/}Zorgaanbieder'
-    ZORGAANBIEDER_NAAM = '{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/release2/}Zorgaanbiedernaam'
-    GEGEVENSDIENSTEN = '{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/release2/}Gegevensdiensten'
-    GEGEVENSDIENST_ID = '{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/release2/}GegevensdienstId'
-    SYSTEEMROLLEN = '{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/release2/}Systeemrollen'
-    RESOURCE_ENDPOINT = '{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/release2/}ResourceEndpoint'
-    SYSTEEMROLCODE = '{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/release2/}Systeemrolcode'
-    TOKEN_ENDPOINT = '{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/release2/}TokenEndpoint'
-    AUTH_ENDPOINT = '{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/release2/}AuthorizationEndpoint'
+VERSION = 'release2'
 
-def parse_zal(zal):
+class XMLIdentifiers:
+    ZORGAANBIEDER = f'{{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/{VERSION}/}}Zorgaanbieder'
+    ZORGAANBIEDER_NAAM = f'{{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/{VERSION}/}}Zorgaanbiedernaam'
+    GEGEVENSDIENSTEN = f'{{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/{VERSION}/}}Gegevensdiensten'
+    GEGEVENSDIENST_ID = f'{{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/{VERSION}/}}GegevensdienstId'
+    SYSTEEMROLLEN = f'{{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/{VERSION}/}}Systeemrollen'
+    RESOURCE_ENDPOINT = f'{{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/{VERSION}/}}ResourceEndpoint'
+    SYSTEEMROLCODE = f'{{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/{VERSION}/}}Systeemrolcode'
+    TOKEN_ENDPOINT = f'{{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/{VERSION}/}}TokenEndpoint'
+    AUTH_ENDPOINT = f'{{xmlns://afsprakenstelsel.medmij.nl/zorgaanbiederslijst/{VERSION}/}}AuthorizationEndpoint'
+
+def parse_zal(zal, gnl):
+    """
+        Convert a xml.etree.ElementTree.ElementTree into a `ZAL <#medmij_oauth.client.ZAL>`__ Object
+
+        :type zal: xml.etree.ElementTree.ElementTree
+        :param zal: a xml.etree.ElementTree.ElementTree containing the ZAL
+
+        :type gnl: dict
+        :param gnl: dict containing gegevensdienstnamen supplied by the medmij_oauth.client.parse_gnl function
+
+        Return:
+            `ZAL <#medmij_oauth.client.ZAL>`__ object with data from the ETree object
+    """
     zorgaanbieders = []
 
     for zorgaanbieder in zal.iter(XMLIdentifiers.ZORGAANBIEDER):
@@ -112,4 +163,4 @@ def parse_zal(zal):
 
         zorgaanbieders.append(zorgaanbieder_dict)
 
-    return ZAL(zorgaanbieders)
+    return ZAL(zorgaanbieders, gnl)

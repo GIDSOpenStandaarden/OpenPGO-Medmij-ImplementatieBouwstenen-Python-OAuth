@@ -43,4 +43,4 @@ The OAuthSession should at least have the following attributes:
 - **access_token_expiration** (datetime.datetime)
 - **client_bsn** (string)
 
-Here is an `example implementation </_modules/medmij_oauth/server/data_store.html#OAuthSession/>`__
+Here is an `example implementation <_modules/medmij_oauth/server/data_store.html#OAuthSession/>`__

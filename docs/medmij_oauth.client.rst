@@ -49,4 +49,4 @@ The OAuthSession should at least have the following attributes:
 - **authorized** (boolean)
 - **access_token** (string)
 
-Here is a `example implementation </_modules/medmij_oauth/client/data_store.html#OAuthSession/>`__
+Here is a `example implementation <_modules/medmij_oauth/client/data_store.html#OAuthSession/>`__

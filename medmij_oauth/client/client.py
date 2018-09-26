@@ -12,7 +12,10 @@ class Client:
     :param data_store: Must be subclass of DataStore, handles data interaction with OAuthSessions see `Datastore <medmij_oauth.client.html#datastore>`__ for more info.
 
     :type get_zal: async function
-    :param get_zal: Function that returns a `ZAL <#medmij_oauth.client.ZAL>`__
+    :param get_zal: Function that returns a `ZAL <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
+
+    :type get_gnl: async function
+    :param get_gnl: Function that returns a gnl <#medmij_oauth.client.parse_gnl>`__
 
     :type client_info: dict
     :param client_info: Dict containing info about the client application (client_id and redirect_url for authorization request responses)
@@ -21,8 +24,9 @@ class Client:
     :param make_request: Function that makes a post request. Should have signature (url, body)->dict. Used to make a authorization exchange request to the oauth server.
     """
 
-    def __init__(self, data_store=None, get_zal=None, client_info=None, make_request=None):
+    def __init__(self, data_store=None, get_zal=None, get_gnl=None, client_info=None, make_request=None):
         assert get_zal is not None, "Can't instantiate Client without 'get_zal'"
+        assert get_gnl is not None, "Can't instantiate Client without 'get_gnl'"
         assert make_request is not None, "Can't instantiate Client without 'make_request'"
         assert client_info is not None, "Can't instantiate Client without 'client_info'"
 
@@ -35,10 +39,11 @@ class Client:
         self.client_info = client_info
         self.make_request = make_request
         self._get_zal = get_zal
+        self._get_gnl = get_gnl
 
     async def get_zal(self):
-        """Return the ZAL returned by the get_zal function supplied in instantiation of Client object"""
-        return await self._get_zal()
+        """Return a tuple of the ZAL and GNL returned by the get_zal and get_gnl function supplied in instantiation of Client object"""
+        return (await self._get_zal(), await self._get_gnl())
 
     async def create_oauth_session(self, za_name, gegevensdienst_id, **kwargs):
         """
@@ -78,11 +83,12 @@ class Client:
             'redirect_uri': self.redirect_uri
         }
 
-        za = (await self.get_zal())[oauth_session.za_name]
+        zal, gnl = await self.get_zal()
+        za = zal[oauth_session.za_name]
         gegevensdienst = za.gegevensdiensten[oauth_session.gegevensdienst_id]
         query_parameters = urllib.parse.urlencode(request_dict)
 
-        return f'{gegevensdienst.authorization_endpoint}?{query_parameters}'
+        return f'{gegevensdienst.authorization_endpoint_uri}?{query_parameters}'
 
     async def handle_auth_response(self, parameters, **kwargs):
         """
@@ -111,9 +117,10 @@ class Client:
         :type oauth_session: `OAuthSession <#oauthsession>`__
         :param oauth_session: Authorized oauth session of which to exchange the authorization code
         """
-        za = (await self.get_zal())[oauth_session.za_name]
+        zal, gnl = await self.get_zal()
+        gd = zal[oauth_session.za_name].gegevensdiensten[oauth_session.gegevensdienst_id]
 
-        response = await self.make_request(url=za.token_endpoint, body={
+        response = await self.make_request(url=gd.token_endpoint_uri, body={
             'grant_type': 'authorization_code',
             'code': oauth_session.authorization_code,
             'redirect_uri': self.redirect_uri,

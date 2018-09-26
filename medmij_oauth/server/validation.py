@@ -81,7 +81,7 @@ def validate_request_parameters(request_parameters, ocl):
             error_description='client unknown'
         )
 
-    validate_redirect_uri(redirect_uri, ocl.get(client_id).get('hostname'))
+    validate_redirect_uri(redirect_uri, ocl.get(client_id).hostname)
 
     if not response_type:
         raise OAuthException(

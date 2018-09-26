@@ -10,8 +10,11 @@ async def get_select_zal(request):
 
     csrf_token = await csrf.generate_csrf_token(request)
 
+    zal, gnl = await client.get_zal()
+
     return render_template('select_gd.html', request, {
-        'zal': await client.get_zal(),
+        'zal': zal,
+        'gnl': gnl,
         'csrf_token': csrf_token
     })
 

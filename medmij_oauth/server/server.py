@@ -1,5 +1,6 @@
 """Server module to help implementing a oauth server"""
 import urllib.parse
+import datetime
 from . import (
     DataStore,
     tokens,
@@ -22,7 +23,7 @@ class Server():
     :param zg_resource_available: Function that is called by Server.zg_resource_available to determine if resources are available for zorggebruiker.
 
     :type get_ocl: function
-    :param get_ocl: Function that returns a `OCL <#medmij_oauth.server.OCL>`__
+    :param get_ocl: Function that returns a `OCL <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
     """
 
     def __init__(self, data_store=None, zg_resource_available=None, get_ocl=None):
@@ -179,7 +180,7 @@ class Server():
         query_dict = {
             'code': oauth_session.authorization_code,
             'state': oauth_session.state,
-            'expires_in': oauth_session.authorization_code_expiration.subtract(),
+            'expires_in': (oauth_session.authorization_code_expiration - datetime.datetime.now()).seconds,
             'token_type': 'bearer'
         }
 

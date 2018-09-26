@@ -24,7 +24,6 @@ def server(request):
     return Server(
         data_store=InMemoryDataStore(),
         get_ocl=create_get_test_ocl(),
-        is_known_zg=ret_true,
         zg_resource_available=ret_true
     )
 
@@ -114,7 +113,7 @@ async def test_handle_auth_grant(server):
     assert oauth_session.authorization_granted
     assert oauth_session.authorization_code
     assert oauth_session.authorization_code_expiration > datetime.now()
-    assert redirect_url == f'{oauth_session.redirect_uri}?code={oauth_session.authorization_code}&state={oauth_session.state}&expires_in=900&token_type=bearer'
+    assert redirect_url == f'{oauth_session.redirect_uri}?code={oauth_session.authorization_code}&state={oauth_session.state}&expires_in={(oauth_session.authorization_code_expiration - datetime.now()).seconds}&token_type=bearer'
 
     oauth_session = await get_oauth_session(server)
 

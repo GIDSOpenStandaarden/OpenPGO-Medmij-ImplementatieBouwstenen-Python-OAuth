@@ -10,13 +10,6 @@ from .data_store_implementations import (
     InMemoryDataStore
 )
 
-from .zal import (
-    parse_zal,
-    ZAL,
-    Zorgaanbieder,
-    Gegevensdienst
-)
-
 from .gnl import (
     parse_gnl
 )

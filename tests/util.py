@@ -1,9 +1,8 @@
 from os import path
 import xml.etree.ElementTree as ET
 
-from medmij_oauth.server import parse_ocl
+import medmij as medmij_lists
 from medmij_oauth.client import parse_gnl
-from medmij_oauth.client import parse_zal
 
 async def ret_false(**kwargs):
     return False
@@ -18,26 +17,27 @@ def create_get_test_ocl():
         if ocl is not None:
             return ocl
 
-        ocl = parse_ocl(ET.parse(
-            path.join(path.dirname(__file__), 'resources/ocl.xml')
-        ).getroot())
+        with open(path.join(path.dirname(__file__), 'resources/ocl.xml'), 'r') as file:
+            xml = bytes(file.read(), 'utf-8')
 
-        return ocl
+        return medmij_lists.OAuthclientList(xmldata=xml)
 
     return get_test_ocl
 
-from medmij_oauth.client.zal import parse_zal
+def create_get_test_gnl():
+    gnl = None
+    async def get_test_gnl():
+        nonlocal gnl
+        if gnl is not None:
+            return gnl
 
-async def get_test_gnl():
-    nonlocal gnl
-    if gnl is not None:
+        gnl = parse_gnl(ET.parse(
+            path.join(path.dirname(__file__), 'resources/MedMij_Gegevensdienstnamenlijst_example.xml')
+        ).getroot())
+
         return gnl
-
-    gnl = parse_gnl(ET.parse(
-        path.join(path.dirname(__file__), 'resources/MedMij_Gegevensdienstnamenlijst_example.xml')
-    ).getroot())
-
-    return gnl
+    
+    return get_test_gnl
 
 def create_get_test_zal():
     zal = None
@@ -45,11 +45,11 @@ def create_get_test_zal():
         nonlocal zal
         if zal is not None:
             return zal
-        gnl = await get_test_zal()
 
-        zal = parse_zal(ET.parse(
-            path.join(path.dirname(__file__), 'resources/zal.xml')
-        ).getroot(), gnl)
+        with open(path.join(path.dirname(__file__), 'resources/zal.xml'), 'r') as file:
+            xml = bytes(file.read(), 'utf-8')
+
+        return medmij_lists.ZAL(xmldata=xml)
 
         return zal
 

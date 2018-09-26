@@ -80,9 +80,9 @@
                             Selecteer gegevensdienst
                         </label>
                         <select name="za" id="za">
-                            {% for za in zal %}
-                                {% for gegevensdienst in za.gegevensdiensten.values() %}
-                                    <option value="{{za.naam}}::{{gegevensdienst.id}}">{{za.naam}} - {{gegevensdienst.display_name}}</option>
+                            {% for name, za in zal._zorgaanbieders.items() %}
+                                {% for id, gegevensdienst in za.gegevensdiensten.items() %}
+                                    <option value="{{name}}::{{id}}">{{name}}-{{gnl[id]}}</option>
                                 {% endfor %}
                             {% endfor %}
                         </select>
@@ -93,15 +93,5 @@
             </div>
         </div>
     </section>
-    <div>
-        {% for za in zal %}
-            {% for gegevensdienst in za.gegevensdiensten.values() %}
-            {% for a in gegevensdienst.endpoints() %}
-            
-                {{a}}<br>
-            {% endfor %}
-            {% endfor %}
-    {% endfor %}
-    </div>
 </body>
 </html>

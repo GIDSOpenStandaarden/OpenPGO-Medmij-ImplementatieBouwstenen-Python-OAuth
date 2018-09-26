@@ -7,19 +7,6 @@ Client
 .. autoclass:: medmij_oauth.client.Client
     :members:
 
-ZAL (Zorgaanbiederslijst)
--------------------------
-.. autofunction:: medmij_oauth.client.parse_zal
-
-.. autoclass:: medmij_oauth.client.ZAL
-    :members:
-
-.. autoclass:: medmij_oauth.client.Zorgaanbieder
-    :members:
-
-.. autoclass:: medmij_oauth.client.Gegevensdienst
-    :members:
-
 GNL (Gegevensdienstnamenlijst)
 ------------------------------
 .. autofunction:: medmij_oauth.client.parse_gnl

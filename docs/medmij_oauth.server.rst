@@ -7,13 +7,6 @@ Server
 .. autoclass:: medmij_oauth.server.Server
     :members:
 
-OCL (OAuth client lijst)
-------------------------
-.. autofunction:: medmij_oauth.server.parse_ocl
-
-.. autoclass:: medmij_oauth.server.OCL
-    :members:
-
 Datastore
 ---------
 .. autoclass:: medmij_oauth.server.DataStore

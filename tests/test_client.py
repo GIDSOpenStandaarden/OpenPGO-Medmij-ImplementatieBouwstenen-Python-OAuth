@@ -14,6 +14,7 @@ from .util import (
     ret_true,
     ret_false,
     create_get_test_zal,
+    create_get_test_gnl,
     create_mock_make_request
 )
 
@@ -26,21 +27,25 @@ def client(request):
             'redirect_uri': 'https://oauthclient.local/oauth/cb'
         },
         get_zal=create_get_test_zal(),
+        get_gnl=create_get_test_gnl(),
         make_request=create_mock_make_request({})
     )
 
 @mark.asyncio
 @fixture
 async def oauth_session(client):
-    za = (await client.get_zal())['oauthserver.local@medmij']
+    zal, gnl = await client.get_zal()
+    za =  zal['oauthserverlocal@medmij']
 
-    return await client.create_oauth_session(za.naam)
+    return await client.create_oauth_session(za.naam, "1")
 
 @mark.asyncio
 async def test_create_oauth_session(client):
-    za = (await client.get_zal())['oauthserver.local@medmij']
+    zal, gnl = await client.get_zal()
+    za =  zal['oauthserverlocal@medmij']
+    gd_id = "1"
 
-    oauth_session = await client.create_oauth_session(za.naam)
+    oauth_session = await client.create_oauth_session(za.naam, gd_id)
 
     assert oauth_session.za_name == za.naam
 

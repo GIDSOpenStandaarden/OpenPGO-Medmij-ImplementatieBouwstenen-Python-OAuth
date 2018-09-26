@@ -17,7 +17,7 @@ Modules
 Server
 ~~~~~~
 
-Reference documentation: `medmij_oauth.server <medmij_oauth.server.html>`__
+API Reference: `medmij_oauth.server <medmij_oauth.server.html>`__
 
 The medmij_oauth.server modules goal is to assist in implementing an oauth server conform the medmij flow, its main component is the Server class.
 
@@ -61,16 +61,15 @@ On instatiation the Server class it needs 3 arguments
 
 The data_store argument is implementation of the `DataStore <medmij_oauth.server.html#datastore>`__ Baseclass
 
-
 Client
 ~~~~~~
 
-`medmij_oauth.client <medmij_oauth.client.html>`__
+API Reference: `medmij_oauth.client <medmij_oauth.client.html>`__
 
 Exceptions
 ~~~~~~~~~~
 
-`medmij_oauth.exceptions <medmij_oauth.exceptions.html>`__
+API Reference: `medmij_oauth.exceptions <medmij_oauth.exceptions.html>`__
 
 The MedMij OAuth flow
 ---------------------

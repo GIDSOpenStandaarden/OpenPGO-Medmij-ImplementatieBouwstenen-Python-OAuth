@@ -14,6 +14,9 @@ class Client:
     :type get_zal: coroutine
     :param get_zal: Function that returns a `ZAL <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
 
+    :type get_whitelist: coroutine
+    :param get_whitelist: Function that returns a `Whitelist <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
+
     :type get_gnl: coroutine
     :param get_gnl: Function that returns a `gnl <#medmij_oauth.client.parse_gnl>`__
 
@@ -24,9 +27,10 @@ class Client:
     :param make_request: Function that makes a post request. Should have signature (url, body)->dict. Used to make a authorization exchange request to the oauth server.
     """
 
-    def __init__(self, data_store=None, get_zal=None, get_gnl=None, client_info=None, make_request=None):
+    def __init__(self, data_store=None, get_zal=None, get_gnl=None, get_whitelist=None, client_info=None, make_request=None):
         assert get_zal is not None, "Can't instantiate Client without 'get_zal'"
         assert get_gnl is not None, "Can't instantiate Client without 'get_gnl'"
+        assert get_whitelist is not None, "Can't instantiate Client without 'get_whitelist'"
         assert make_request is not None, "Can't instantiate Client without 'make_request'"
         assert client_info is not None, "Can't instantiate Client without 'client_info'"
 
@@ -40,14 +44,18 @@ class Client:
         self.make_request = make_request
         self._get_zal = get_zal
         self._get_gnl = get_gnl
+        self._get_whitelist = get_whitelist
 
     async def get_zal(self):
         """Return a tuple of the ZAL and GNL returned by the get_zal and get_gnl function supplied in instantiation of Client object"""
-        return (await self._get_zal(), await self._get_gnl())
+        zal = await self._get_zal()
+        gnl = await self._get_gnl()
+
+        return (zal, gnl)
 
     async def create_oauth_session(self, za_name, gegevensdienst_id, **kwargs):
         """
-        Create and return a new OAuthSession to start the oauth flow. Add the zorggebruikers choice of zorgaanbieder gegevensdienst. `(2) <index.html#id2>`__
+        Create and return a new OAuthSession to start the oauth flow. Add the zorggebruikers choice of zorgaanbieder gegevensdienst. `FLOW #2 <index.html#id2>`__
 
         :type za_name: string
         :param za_name: Name of zorgaanbieder chosen by the zorggebruiker.
@@ -62,11 +70,12 @@ class Client:
             `OAuthSession <#oauthsession>`__: The created OAuthSession.
 
         """
+
         return await self.data_store.create_oauth_session(za_name=za_name, gegevensdienst_id=gegevensdienst_id, **kwargs)
 
     async def create_auth_request_url(self, oauth_session):
         """
-        Build and return authorization request url `(2) <index.html#id2>`__
+        Build and return authorization request url `FLOW #2 <index.html#id2>`__
 
         :type oauth_session: `OAuthSession <#oauthsession>`__
         :param oauth_session: OAuthSession for current zorggebruiker
@@ -87,6 +96,8 @@ class Client:
         za = zal[oauth_session.za_name]
         gegevensdienst = za.gegevensdiensten[oauth_session.gegevensdienst_id]
         query_parameters = urllib.parse.urlencode(request_dict)
+
+        validation.validate_endpoint(gegevensdienst.authorization_endpoint_uri, await self._get_whitelist())
 
         return f'{gegevensdienst.authorization_endpoint_uri}?{query_parameters}'
 
@@ -112,15 +123,17 @@ class Client:
 
     async def exchange_authorization_code(self, oauth_session, **kwargs):
         """
-        Make a request to a oauth server with the supplied make_request function on instantiation of the Client, exchange the received authorization code for an access token and update the oauth_session. `(12) <index.html#id12>`__
+        Make a request to a oauth server with the supplied make_request function on instantiation of the Client, exchange the received authorization code for an access token and update the oauth_session. `FLOW #12 <index.html#id12>`__
 
         :type oauth_session: `OAuthSession <#oauthsession>`__
         :param oauth_session: Authorized oauth session of which to exchange the authorization code
         """
         zal, gnl = await self.get_zal()
-        gd = zal[oauth_session.za_name].gegevensdiensten[oauth_session.gegevensdienst_id]
+        gegevensdienst = zal[oauth_session.za_name].gegevensdiensten[oauth_session.gegevensdienst_id]
 
-        response = await self.make_request(url=gd.token_endpoint_uri, body={
+        validation.validate_endpoint(gegevensdienst.token_endpoint_uri, await self._get_whitelist())
+
+        response = await self.make_request(url=gegevensdienst.token_endpoint_uri, body={
             'grant_type': 'authorization_code',
             'code': oauth_session.authorization_code,
             'redirect_uri': self.redirect_uri,

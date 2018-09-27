@@ -24,11 +24,15 @@ class Server():
 
     :type get_ocl: function
     :param get_ocl: Function that returns a `OCL <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
+
+    :type get_whitelist: coroutine
+    :param get_whitelist: Function that returns a `Whitelist <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
     """
 
-    def __init__(self, data_store=None, zg_resource_available=None, get_ocl=None):
+    def __init__(self, data_store=None, zg_resource_available=None, get_ocl=None, get_whitelist=None):
         assert zg_resource_available is not None, "Can't instantiate Server without 'zg_resource_available'"
         assert get_ocl is not None, "Can't instantiate Server without 'get_ocl'"
+        assert get_whitelist is not None, "Can't instantiate Server without 'get_whitelist'"
 
         if not issubclass(data_store.__class__, DataStore):
             raise ValueError(
@@ -37,6 +41,7 @@ class Server():
 
         self.data_store = data_store
         self._get_ocl = get_ocl
+        self._get_whitelist = get_whitelist
         self._zg_resource_available = zg_resource_available
 
     async def get_ocl(self):
@@ -45,12 +50,13 @@ class Server():
 
 
     async def create_oauth_session(self, request_parameters, **kwargs):
-        """Create and return a new `OAuthSession <#oauthsession>`__.
+        """
+        Create and return a new `OAuthSession <#oauthsession>`__ request. (`FLOW #3 <index.html#id3>`__)
 
         request_parameters are validated and an appropriate `OAuthException <medmij_oauth.exceptions.html#oauthexception>`__ is raised if supplied request_parameters are not valid
 
         :type request_parameters: dict
-        :param request_parameters: Dictionary containing the request parameters from the start verzamelen `(3) <index.html#id3>`__ request.
+        :param request_parameters: Dictionary containing the request parameters from the start verzamelen.
 
         :type \*\*args: various
         :param \*\*args: Keyword arguments get passed on to the data_store.create_oauth_session function, e.g. db object
@@ -59,7 +65,7 @@ class Server():
             OAuthSession: The created `OAuthSession <#oauthsession>`__.
 
         """
-        validation.validate_request_parameters(request_parameters, (await self.get_ocl()))
+        validation.validate_request_parameters(request_parameters, (await self.get_ocl()), (await self._get_whitelist()))
 
         oauth_session = await self.data_store.create_oauth_session(
             response_type=request_parameters.get('response_type'),
@@ -74,7 +80,7 @@ class Server():
 
     async def zg_resource_available(self, oauth_session=None, oauth_session_id=None, client_data={}, **kwargs):
         """
-        Determine if this service has resources available for this zorggebruikers `(8) <index.html#id8>`__ by calling the supplied zg_resource_available function on instatiation of the Server.
+        Determine if this service has resources available for this zorggebruikers by calling the supplied zg_resource_available function on instatiation of the Server. (`FLOW #8 <index.html#id8>`__)
 
         This function requires a least an oauth_session or an oauthsession id.
         BSN is added to the client_data that is passed to the self._zg_resource_available function.
@@ -116,7 +122,7 @@ class Server():
         return True
 
     async def handle_auth_grant(self, oauth_session_id=None, authorized=False, **kwargs):
-        """Handle the zorggebruikers response to the authorization question `(10) <index.html#id10>`__.
+        """Handle the zorggebruikers response to the authorization question. (`FLOW #10 <index.html#id10>`__)
 
         Log whether the zorggebruiker authorized the request.
         If the authorization request is denied an OAuthException is raised.
@@ -187,7 +193,7 @@ class Server():
         return f'{oauth_session.redirect_uri}?{urllib.parse.urlencode(query_dict)}'
 
     async def exchange_authorization_code(self, request_parameters, **kwargs):
-        """Handle the oauth client's request to exchange the authorization code for an access token `(13) <index.html#id13>`__.
+        """Handle the oauth client's request to exchange the authorization code for an access token. (`FLOW #13 <index.html#id13>`__)
 
         Validate the request, update the oauth_session and return dict with response parameters.
 

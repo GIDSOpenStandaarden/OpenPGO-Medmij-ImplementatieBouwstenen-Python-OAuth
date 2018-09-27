@@ -39,6 +39,23 @@ def create_get_test_gnl():
     
     return get_test_gnl
 
+def create_get_test_whitelist():
+    whitelist = None
+
+    async def get_test_whitelist():
+        nonlocal whitelist
+        if whitelist is not None:
+            return whitelist
+
+        with open(path.join(path.dirname(__file__), 'resources/whitelist.xml'), 'r') as file:
+            xml = bytes(file.read(), 'utf-8')
+
+        return medmij_lists.Whitelist(xmldata=xml)
+
+        return whitelist
+
+    return get_test_whitelist
+
 def create_get_test_zal():
     zal = None
     async def get_test_zal():

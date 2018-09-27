@@ -15,6 +15,7 @@ from .util import (
     ret_false,
     create_get_test_zal,
     create_get_test_gnl,
+    create_get_test_whitelist,
     create_mock_make_request
 )
 
@@ -28,6 +29,7 @@ def client(request):
         },
         get_zal=create_get_test_zal(),
         get_gnl=create_get_test_gnl(),
+        get_whitelist=create_get_test_whitelist(),
         make_request=create_mock_make_request({})
     )
 

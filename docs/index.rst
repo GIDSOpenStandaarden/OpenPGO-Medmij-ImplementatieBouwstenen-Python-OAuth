@@ -9,13 +9,10 @@ Welcome to MedMij OAuth's documentation
 The medmij_oauth package assists in implementing an oauth server/client application conform the medmij oauth flow (described below), it consists of 3 modules (server, client and exceptions).
 The client and server modules are build for use with an async library like `aiohttp <https://github.com/aio-libs/aiohttp>`__.
 
-Beside the package there are two example implementations available on the `github repo <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python-OAuth>`__, an oauth server and client implementation built using these modules.
-
-Modules
--------
+Beside the package there are two example implementations available on the `github repo <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python-OAuth>`__, an oauth server and client implementation built using these modules (Only a reference, not for production use!).
 
 Server
-~~~~~~
+======
 
 API Reference: `medmij_oauth.server <medmij_oauth.server.html>`__
 
@@ -27,7 +24,8 @@ To make use of the Server class you need to implement the following:
 - zg_resource_available (coroutine)
 - get_ocl (coroutine)
 
-**DataStore ABC**
+DataStore ABC
+-------------
 
 Your implementation of the DataStore class handles instantiation, persisting and lookups of OAuthSessions.
 The methods that you need to implement can be found on the `DataStore ABC <medmij_oauth.server.html#DataStore>`__.
@@ -83,7 +81,8 @@ Example implementation:
 
 `more info <medmij_oauth.server.html#DataStore>`__
 
-**OAuthSession**
+OAuthSession
+------------
 
 This class represents the state of the current oauth session. The Server class will handle instantiation and interaction with OAuthSessions through your implementation of the DataStore ABC.
 
@@ -92,45 +91,65 @@ Example implementation:
 .. code:: python
 
     class OAuthSession():
-    def __init__(self, response_type, client_id, redirect_uri, scope, state):
-        self.id = str(uuid.uuid4())
-        self.response_type = response_type
-        self.client_id = client_id
-        self.scope = scope
-        self.state = state
-        self.redirect_uri = redirect_uri
-        self.created_at = datetime.datetime.now()
-        self.authorization_code = None
-        self.authorization_code_expiration = -1
-        self.authorization_granted = False
-        self.access_token = None
-        self.access_token_expiration = -1
-        self.zorggebruiker_bsn = ''
+        def __init__(self, response_type, client_id, redirect_uri, scope, state):
+            self.id = str(uuid.uuid4())
+            self.response_type = response_type
+            self.client_id = client_id
+            self.scope = scope
+            self.state = state
+            self.redirect_uri = redirect_uri
+            self.created_at = datetime.datetime.now()
+            self.authorization_code = None
+            self.authorization_code_expiration = -1
+            self.authorization_granted = False
+            self.access_token = None
+            self.access_token_expiration = -1
+            self.zorggebruiker_bsn = ''
 
 `more info <medmij_oauth.server.html#oauthsession>`__
 
-**zg_resource_available**
+zg_resource_available
+---------------------
 
 An coroutine that checks if resources are available for the current zorggebruiker. Should return a boolean and is called by the Server object with a dict containing at least the BSN of the zorggebruiker.
 
-`more info <medmij_oauth.server.Server.zg_resource_available>`__
+`more info <medmij_oauth.server.html#medmij_oauth.server.Server.zg_resource_available>`__
 
-**get_ocl**
+get_ocl
+-------
 
-An coroutine that returns an OCL object.
+An coroutine that returns an `OCL <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__.
 
 Example implementation:
 
 .. code:: python
 
     async def get_ocl():
+        # Probably some caching and retreiving an up to date list but as an example load it from disk.
         async with aiofiles.open(path.join(path.dirname(__file__), 'resources/ocl.xml'), mode='r') as file:
             contents = await f.read()
             xml = bytes(file.read(), 'utf-8')
 
         return medmij_lists.OAuthclientList(xmldata=xml)
 
-`more info <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
+get_whitelist
+-------------
+
+An coroutine that returns an `Whitelist <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__.
+
+Example implementation:
+
+.. code:: python
+
+    async def get_whitelist():
+        # Probably some caching and retreiving an up to date list but as an example load it from disk.
+        async with aiofiles.open(path.join(path.dirname(__file__), 'resources/whitelist.xml'), mode='r') as file:
+            contents = await f.read()
+            xml = bytes(file.read(), 'utf-8')
+
+        return medmij_lists.Whitelist(xmldata=xml)
+
+
 
 
 Server usage example
@@ -167,17 +186,19 @@ Server usage example
 For a full example implementation checkout the `server_implementation <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python-OAuth/tree/master/server_implementation>`__ on github.
 
 Client
-~~~~~~
+======
 
 API Reference: `medmij_oauth.client <medmij_oauth.client.html>`__
 
 Exceptions
-~~~~~~~~~~
+==========
 
 API Reference: `medmij_oauth.exceptions <medmij_oauth.exceptions.html>`__
 
 The MedMij OAuth flow
----------------------
+=====================
+
+In the API references you find links to this flow, that means that those functions assist this step in the flow. (e.g. `Server.create_oauth_session <medmij_oauth.server.html#medmij_oauth.server.Server.create_oauth_session>`__)
 
 .. _1:
 
@@ -244,14 +265,14 @@ The MedMij OAuth flow
 16. Deze bewaart de ontvangen gezondheidsinformatie in het persoonlijke dossier. Mocht de  Gegevensdienst  waartoe de  Zorggebruiker  heeft geautoriseerd uit meerdere  Transacties  bestaan, bevraagt de  PGO Server  de  Resource Server  daarna mogelijk opnieuw voor de nog resterende  Transacties , eventueel na nieuwe gebruikersinteractie. Zolang het access token geldig is, kan dat.
 
 Requirements
-------------
+============
 
 Modules
-~~~~~~~
+-------
 - Python >=3.6
 
 Example implementations
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 - aiohttp==3.3.2
 - aiohttp-jinja2==1.0.0
 - aiohttp-session==2.5.1

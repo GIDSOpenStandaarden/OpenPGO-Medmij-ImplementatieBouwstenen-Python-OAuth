@@ -1,8 +1,12 @@
+from urllib.parse import urlparse
+
 from medmij_oauth.exceptions import (
     OAuthException,
     lookup_error_code
 )
 
+def get_hostname(url):
+    return urlparse(url).hostname
 
 def validate_auth_response(data):
     if data.get("error"):
@@ -13,6 +17,14 @@ def validate_auth_response(data):
 
     if not data.get('state'):
         raise ValueError('Missing param \'state\' in auth response')
+
+    return True
+
+def validate_endpoint(endpoint, whitelist):
+    hostname = get_hostname(endpoint)
+
+    if not hostname in whitelist:
+        raise ValueError(f'Hostname not whitelisted: {hostname}')
 
     return True
 

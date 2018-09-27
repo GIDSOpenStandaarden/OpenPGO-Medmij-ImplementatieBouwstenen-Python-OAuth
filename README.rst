@@ -1,3 +1,7 @@
+.. image:: https://readthedocs.org/projects/medmij-oauth/badge/?version=latest
+    :target: https://medmij-oauth.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
 .. image:: https://travis-ci.org/BasKloosterman/medmij_oauth.svg?branch=master
     :target: https://travis-ci.org/BasKloosterman/medmij_oauth
 

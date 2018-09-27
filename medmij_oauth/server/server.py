@@ -1,15 +1,16 @@
 """Server module to help implementing a oauth server"""
 import urllib.parse
 import datetime
-from . import (
-    DataStore,
-    tokens,
-    validation
-)
 
 from medmij_oauth.exceptions import (
     OAuthException,
     ERRORS
+)
+
+from . import (
+    DataStore,
+    tokens,
+    validation
 )
 
 class Server():

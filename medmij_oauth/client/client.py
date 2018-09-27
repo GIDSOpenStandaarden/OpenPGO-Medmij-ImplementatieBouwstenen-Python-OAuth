@@ -86,13 +86,13 @@ class Client:
 
         request_dict = {
             'state': oauth_session.state,
-            'scope': 1,
+            'scope': oauth_session.gegevensdienst_id,
             'response_type': 'code',
             'client_id': self.client_id,
             'redirect_uri': self.redirect_uri
         }
 
-        zal, gnl = await self.get_zal()
+        zal, _ = await self.get_zal()
         za = zal[oauth_session.za_name]
         gegevensdienst = za.gegevensdiensten[oauth_session.gegevensdienst_id]
         query_parameters = urllib.parse.urlencode(request_dict)
@@ -128,7 +128,7 @@ class Client:
         :type oauth_session: `OAuthSession <#oauthsession>`__
         :param oauth_session: Authorized oauth session of which to exchange the authorization code
         """
-        zal, gnl = await self.get_zal()
+        zal, _ = await self.get_zal()
         gegevensdienst = zal[oauth_session.za_name].gegevensdiensten[oauth_session.gegevensdienst_id]
 
         validation.validate_endpoint(gegevensdienst.token_endpoint_uri, await self._get_whitelist())

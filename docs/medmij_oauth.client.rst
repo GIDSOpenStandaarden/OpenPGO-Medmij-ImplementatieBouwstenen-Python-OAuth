@@ -33,4 +33,17 @@ The OAuthSession should at least have the following attributes:
 - **authorized** (boolean)
 - **access_token** (string)
 
-Here is a `example implementation <_modules/medmij_oauth/client/data_store.html#OAuthSession/>`__
+Example implementation:
+
+.. code:: python
+
+    class OAuthSession():
+        def __init__(self, state, za_name, gegevensdienst_id, scope):
+            self.id = str(uuid.uuid4())
+            self.state = state
+            self.scope = gegevensdienst_id
+            self.za_name = za_name
+            self.gegevensdienst_id = gegevensdienst_id
+            self.authorization_code = None
+            self.authorized = False
+            self.access_token = None

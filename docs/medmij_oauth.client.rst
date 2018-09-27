@@ -16,8 +16,6 @@ Datastore
     :members:
     :show-inheritance:
 
-.. _OAuthSession:
-
 OAuthSession
 ------------
 

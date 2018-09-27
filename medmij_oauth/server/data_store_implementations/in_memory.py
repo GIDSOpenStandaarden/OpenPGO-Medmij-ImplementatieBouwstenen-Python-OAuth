@@ -1,6 +1,8 @@
+import uuid
+import datetime
+
 from ..data_store import (
-    DataStore,
-    OAuthSession
+    DataStore
 )
 
 SESSIONS = {}
@@ -39,3 +41,19 @@ class InMemoryDataStore(DataStore):
 
     def __repr__(self):
         return 'InMemoryDataStore()'
+
+class OAuthSession():
+    def __init__(self, response_type, client_id, redirect_uri, scope, state):
+        self.id = str(uuid.uuid4())
+        self.response_type = response_type
+        self.client_id = client_id
+        self.scope = scope
+        self.state = state
+        self.redirect_uri = redirect_uri
+        self.created_at = datetime.datetime.now()
+        self.authorization_code = None
+        self.authorization_code_expiration = -1
+        self.authorization_granted = False
+        self.access_token = None
+        self.access_token_expiration = -1
+        self.zorggebruiker_bsn = ''

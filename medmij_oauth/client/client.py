@@ -11,16 +11,16 @@ class Client:
     :type data_store: `Datastore <medmij_oauth.client.html#datastore>`__
     :param data_store: Must be subclass of DataStore, handles data interaction with OAuthSessions see `Datastore <medmij_oauth.client.html#datastore>`__ for more info.
 
-    :type get_zal: async function
+    :type get_zal: coroutine
     :param get_zal: Function that returns a `ZAL <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
 
-    :type get_gnl: async function
+    :type get_gnl: coroutine
     :param get_gnl: Function that returns a `gnl <#medmij_oauth.client.parse_gnl>`__
 
     :type client_info: dict
     :param client_info: Dict containing info about the client application (client_id and redirect_url for authorization request responses)
 
-    :type make_request: async function
+    :type make_request: coroutine
     :param make_request: Function that makes a post request. Should have signature (url, body)->dict. Used to make a authorization exchange request to the oauth server.
     """
 

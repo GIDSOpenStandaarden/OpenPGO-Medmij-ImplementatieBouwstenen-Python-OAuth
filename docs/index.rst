@@ -3,13 +3,13 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to MedMijOAuth's documentation!
+Welcome to MedMij OAuth's documentation!
 =======================================
 
-The medmij_oauth package assist in implementing an oauth server/client application conform the medmij oauth flow (described below), it consists of 3 modules (server, client and exceptions).
-The client and server modules are made for an async implementation.
+The medmij_oauth package assists in implementing an oauth server/client application conform the medmij oauth flow (described below), it consists of 3 modules (server, client and exceptions).
+The client and server modules are build for use with an async library like `aiohttp <https://github.com/aio-libs/aiohttp>`__.
 
-Beside the package there are two example implementations available on the github repo, an oauth server and client implementation built using these modules.
+Beside the package there are two example implementations available on the `github repo <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python-OAuth>`__, an oauth server and client implementation built using these modules.
 
 Modules
 -------
@@ -19,18 +19,67 @@ Server
 
 API Reference: `medmij_oauth.server <medmij_oauth.server.html>`__
 
-The medmij_oauth.server modules goal is to assist in implementing an oauth server conform the medmij flow, its main component is the Server class.
-
+The medmij_oauth.server modules goal is to assist in implementing an oauth server, its main component is the Server class.
 To make use of the Server class you need to implement the following:
 
 - subclass of DataStore (class)
 - OAuthSession (class)
-- zg_resource_available (async function)
-- get_ocl (async function)
+- zg_resource_available (coroutine)
+- get_ocl (coroutine)
 
-**Subclass of DataStore**
+**DataStore ABC**
 
-Your implementation of the DataStore class handles interaction with the OAuthSession class and persisting it (e.g. store the oauth session to a database)
+Your implementation of the DataStore class handles instantiation, persisting and lookups of OAuthSessions.
+The methods that you need to implement can be found on the `DataStore ABC <medmij_oauth.server.html#DataStore>`__.
+Most methods on the Server class use the functions of your implementation of the DataStore.
+Any extra keyword arguments given to those functions are passed on to the methods on the DataStore implementation.
+
+Example implementation:
+
+.. code:: python
+
+    from medmij_oauth.server import (
+        DataStore
+    )
+
+    import my_oauth_session as OAuthSession
+
+    SESSIONS = {}
+
+    class InMemoryDataStore(DataStore):
+        async def create_oauth_session(self, response_type, client_id, redirect_uri, scope, state, **kwargs):
+            oauth_session = OAuthSession(
+                response_type=response_type,
+                client_id=client_id,
+                redirect_uri=redirect_uri,
+                scope=scope,
+                state=state
+            )
+
+            SESSIONS[oauth_session.id] = oauth_session
+
+            return oauth_session
+
+        async def get_oauth_session_by_id(self, oauth_session_id, **kwargs):
+            return SESSIONS.get(oauth_session_id, None)
+
+        async def get_oauth_session_by_authorization_code(self, authorization_code, **kwargs):
+            try:
+                oauth_session = [
+                    oauth_session for
+                    oauth_session in SESSIONS.values()
+                    if oauth_session.authorization_code == authorization_code
+                ][0]
+            except IndexError:
+                return None
+
+            return oauth_session
+
+        async def save_oauth_session(self, oauth_session=None, **kwargs):
+            return oauth_session
+
+        def __repr__(self):
+            return 'InMemoryDataStore()'
 
 `more info <medmij_oauth.server.html#DataStore>`__
 
@@ -38,28 +87,84 @@ Your implementation of the DataStore class handles interaction with the OAuthSes
 
 This class represents the state of the current oauth session. The Server class will handle instantiation and interaction with OAuthSessions through your implementation of the DataStore ABC.
 
+Example implementation:
+
+.. code:: python
+
+    class OAuthSession():
+    def __init__(self, response_type, client_id, redirect_uri, scope, state):
+        self.id = str(uuid.uuid4())
+        self.response_type = response_type
+        self.client_id = client_id
+        self.scope = scope
+        self.state = state
+        self.redirect_uri = redirect_uri
+        self.created_at = datetime.datetime.now()
+        self.authorization_code = None
+        self.authorization_code_expiration = -1
+        self.authorization_granted = False
+        self.access_token = None
+        self.access_token_expiration = -1
+        self.zorggebruiker_bsn = ''
+
 `more info <medmij_oauth.server.html#oauthsession>`__
 
 **zg_resource_available**
 
-An async function that checks if resources are available for the current oauth_session. This function should return a boolean and is called by the Server object with a dict containing at least the BSN of the zorggebruiker.
+An coroutine that checks if resources are available for the current zorggebruiker. Should return a boolean and is called by the Server object with a dict containing at least the BSN of the zorggebruiker.
 
 `more info <medmij_oauth.server.Server.zg_resource_available>`__
 
 **get_ocl**
 
-An async function that returns an OCL object.
+An coroutine that returns an OCL object.
 
-`more info <medmij_oauth.server.html#ocl-oauth-client-lijst>`__
+Example implementation:
+
+.. code:: python
+
+    async def get_ocl():
+        async with aiofiles.open(path.join(path.dirname(__file__), 'resources/ocl.xml'), mode='r') as file:
+            contents = await f.read()
+            xml = bytes(file.read(), 'utf-8')
+
+        return medmij_lists.OAuthclientList(xmldata=xml)
+
+`more info <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
 
 
-On instatiation the Server class it needs 3 arguments
+Server usage example
+````````````````````
 
-- data_store
-- zg_resource_available
-- get_ocl
+.. code:: python
 
-The data_store argument is implementation of the `DataStore <medmij_oauth.server.html#datastore>`__ Baseclass
+    from aiohttp import web
+
+    import my_get_ocl
+    import my_datastore_implemtation
+    import my_zg_resouce_available
+
+    server = Server(
+        data_store=my_datastore_implemtation,
+        zg_resource_available=my_zg_resouce_available,
+        get_ocl=my_get_ocl
+    )
+
+    app['server'] = server
+    app['db] = get_db_somehow()
+
+    async def get_start_session(request):
+        server = request.app['server']
+        server = request.app['db']
+
+        session = await create_oauth_session(request_params, db=db)
+
+    app.router.add_get('/oauth/start', get_start_session)
+
+    app = web.Application()
+    web.run_app(app, port=args.port)
+
+For a full example implementation checkout the `server_implementation <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python-OAuth/tree/master/server_implementation>`__ on github.
 
 Client
 ~~~~~~

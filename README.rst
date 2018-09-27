@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/BasKloosterman/medmij_oauth.svg?branch=master
+    :target: https://travis-ci.org/BasKloosterman/medmij_oauth
+
 Welcome to MedMij OAuth's documentation
 =======================================
 

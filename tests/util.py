@@ -50,7 +50,7 @@ def create_get_test_whitelist():
         with open(path.join(path.dirname(__file__), 'resources/whitelist.xml'), 'r') as file:
             xml = bytes(file.read(), 'utf-8')
 
-        return medmij_lists.Whitelist(xmldata=xml)
+        whitelist = medmij_lists.Whitelist(xmldata=xml)
 
         return whitelist
 
@@ -66,7 +66,7 @@ def create_get_test_zal():
         with open(path.join(path.dirname(__file__), 'resources/zal.xml'), 'r') as file:
             xml = bytes(file.read(), 'utf-8')
 
-        return medmij_lists.ZAL(xmldata=xml)
+        zal = medmij_lists.ZAL(xmldata=xml)
 
         return zal
 

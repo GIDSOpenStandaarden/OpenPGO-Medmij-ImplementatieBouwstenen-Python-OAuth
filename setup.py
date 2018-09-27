@@ -3,7 +3,7 @@ import pathlib
 import re
 here = pathlib.Path(__file__).parent
 
-with open("README.md", "r") as fh:
+with open("README.rst", "r") as fh:
     long_description = fh.read()
 
 txt = (here / 'medmij_oauth' / '__init__.py').read_text('utf-8')
@@ -19,7 +19,7 @@ setuptools.setup(
     version="0.0.1",
     author="Bas Kloosterman",
     author_email="bask@whiteboxsystems.nl",
-    description="Libraries for oauth client/server implementations complying to the MedMij requirements",
+    description="Libraries for oauth client/server implementations according to the MedMij requirements",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/baskloosterman/medmij_oauth",

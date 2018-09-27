@@ -1,7 +1,6 @@
 medmij\_oauth.client module
 ============================
 
-
 Client
 ------
 .. autoclass:: medmij_oauth.client.Client

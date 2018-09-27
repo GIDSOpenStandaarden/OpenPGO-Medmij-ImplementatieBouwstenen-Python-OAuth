@@ -1,6 +1,7 @@
+.. _medmij_oauth.server:
+
 medmij\_oauth.server module
 ============================
-
 
 Server
 ------
@@ -13,7 +14,7 @@ Datastore
     :members:
     :show-inheritance:
 
-.. _OAuthSession:
+.. _oauthsession_server:
 
 OAuthSession
 ------------

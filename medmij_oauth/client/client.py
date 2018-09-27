@@ -24,7 +24,7 @@ class Client:
     :param client_info: Dict containing info about the client application (client_id and redirect_url for authorization request responses)
 
     :type make_request: coroutine
-    :param make_request: Function that makes a post request. Should have signature (url, body)->dict. Used to make a authorization exchange request to the oauth server.
+    :param make_request: coroutine that makes a post request. Should have signature (url, body)->dict. Used to make a authorization exchange request to the oauth server.
     """
 
     def __init__(self, data_store=None, get_zal=None, get_gnl=None, get_whitelist=None, client_info=None, make_request=None):

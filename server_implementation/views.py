@@ -9,7 +9,7 @@ async def get_start_oauth_session(request):
 
     oauth_session = await server.create_oauth_session(query_dict, db=request.db)
 
-    # If one of there functions fail they raise a OAuthExeption that gets handled by the middleware
+    # If there is no resource available the function raises an OAuthException that gets handled by the middleware
     await server.zg_resource_available(oauth_session=oauth_session, client_data={"name": "test patient"})
 
     ocl = await server.get_ocl()

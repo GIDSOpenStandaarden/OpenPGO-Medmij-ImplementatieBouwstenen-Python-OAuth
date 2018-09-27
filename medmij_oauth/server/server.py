@@ -99,7 +99,7 @@ class Server():
             oauth_session = await self.data_store.get_oauth_session_by_id(oauth_session_id)
 
         _client_data = {
-            "bsn": oauth_session.client_bsn,
+            "bsn": oauth_session.zorggebruiker_bsn,
             **client_data
         }
 

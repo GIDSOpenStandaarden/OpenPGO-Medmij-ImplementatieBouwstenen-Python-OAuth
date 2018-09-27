@@ -34,6 +34,6 @@ The OAuthSession should at least have the following attributes:
 - **authorization_granted** (boolean)
 - **access_token** (string)
 - **access_token_expiration** (datetime.datetime)
-- **client_bsn** (string)
+- **zorggebruiker_bsn** (string)
 
 Here is an `example implementation <_modules/medmij_oauth/server/data_store.html#OAuthSession/>`__

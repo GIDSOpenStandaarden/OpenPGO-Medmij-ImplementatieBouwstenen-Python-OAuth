@@ -34,4 +34,4 @@ class OAuthSession():
         self.authorization_granted = False
         self.access_token = None
         self.access_token_expiration = -1
-        self.client_bsn = ''
+        self.zorggebruiker_bsn = ''

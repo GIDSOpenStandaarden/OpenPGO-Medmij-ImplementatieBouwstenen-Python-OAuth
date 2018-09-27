@@ -26,7 +26,7 @@ class OAuthSession(Base):
     authorization_granted = Boolean()
     access_token = Column(Text, unique=True)
     access_token_expiration = Column(DateTime, nullable=False)
-    client_bsn = Column(Text)
+    zorggebruiker_bsn = Column(Text)
 
     def __init__(self, response_type, client_id, redirect_uri, scope, state):
         self.id = str(uuid.uuid4())

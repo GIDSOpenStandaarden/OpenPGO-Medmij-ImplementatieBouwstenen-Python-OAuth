@@ -15,7 +15,7 @@ class Client:
     :param get_zal: Function that returns a `ZAL <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
 
     :type get_gnl: async function
-    :param get_gnl: Function that returns a gnl <#medmij_oauth.client.parse_gnl>`__
+    :param get_gnl: Function that returns a `gnl <#medmij_oauth.client.parse_gnl>`__
 
     :type client_info: dict
     :param client_info: Dict containing info about the client application (client_id and redirect_url for authorization request responses)

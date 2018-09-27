@@ -1,6 +1,10 @@
 .. image:: https://travis-ci.org/BasKloosterman/medmij_oauth.svg?branch=master
     :target: https://travis-ci.org/BasKloosterman/medmij_oauth
 
+.. image:: https://sonarcloud.io/api/project_badges/measure?project=BasKloosterman_medmij_oauth&metric=alert_status
+    :target: https://sonarcloud.io/dashboard?id=BasKloosterman_medmij_oauth
+
+
 Welcome to MedMij OAuth's documentation
 =======================================
 

@@ -136,9 +136,6 @@ def validate_exchange_request(request_parameters, oauth_session):
             error_description='Invalid authorization token'
         )
 
-    # TODO what to do with client_secret?
-
-    #client_secret = request_parameters.get('client_secret')
     grant_type = request_parameters.get('grant_type')
     client_id = request_parameters.get('client_id')
     redirect_uri = request_parameters.get('redirect_uri')

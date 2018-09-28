@@ -132,6 +132,13 @@ async def test_handle_auth_grant(server):
     assert str(ex_info.value) == 'Not a valid oauth_session_id'
 
 @mark.asyncio
+async def test_get_authorization_code_redirect_url_not_authorized(server):
+    oauth_session = await get_oauth_session(server)
+
+    with raises(ValueError) as ex_info:
+        server.get_authorization_code_redirect_url(oauth_session)
+
+@mark.asyncio
 async def test_exchange_authorization_code_valid(server):
     oauth_session = await get_oauth_session(server)
 

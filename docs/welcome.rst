@@ -121,7 +121,7 @@ Example implementation:
 zg_resource_available
 ---------------------
 
-An coroutine that checks if resources are available for the current zorggebruiker, should return a boolean.
+An coroutine with signature :code:`(client_data:dict, **kwargs:various)->bool` that checks if resources are available for the current zorggebruiker .
 Is called when `Server.zg_resource_available <medmij_oauth.server.html#medmij_oauth.server.Server.zg_resource_available>`__ is invoked, with a dict containing at least the BSN of the zorggebruiker.
 
 .. warning:: BSN is added to the OAuthSession in response to the DigiD interaction `FLOW #7 <#id8>`__, this is not (yet) included in the Server class. If you are implementing a server make sure to update the OAuthSession after retreiving the BSN from DigiD.
@@ -390,7 +390,7 @@ Example:
 make_request
 ------------------------
 
-Coroutine that makes a POST request. Should have the signature (url: string, body: dict) -> dict .
+Coroutine that makes a POST request. Should have the signature :code:`(url:string, body:dict)->dict`.
 Used by the client to make a `exchange_authorization_code <medmij_oauth.client.html#medmij_oauth.client.Client.exchange_authorization_code>`__ request to the oauth server.
 
 Example:

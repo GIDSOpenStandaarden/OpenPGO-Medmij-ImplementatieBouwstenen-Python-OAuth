@@ -30,7 +30,7 @@ class Client:
 
     :type make_request: coroutine
     :param make_request: coroutine that makes a post request. Should have
-        the signature (url, body)->dict. Used to make a authorization exchange
+        the signature :code:`(url:string, body:dict)->dict`. Used to make a authorization exchange
         request to the oauth server.
     """
 

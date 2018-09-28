@@ -82,14 +82,10 @@ Example:
 
     # In Server Class
     async def create_oauth_session(self, request_parameters, **kwargs):
-        validation.validate_request_parameters(request_parameters, (await self.get_ocl()), (await self._get_whitelist()))
+        ...
 
         oauth_session = await self.data_store.create_oauth_session(
-            response_type=request_parameters.get('response_type'),
-            client_id=request_parameters.get('client_id'),
-            redirect_uri=request_parameters.get('redirect_uri'),
-            scope=request_parameters.get('scope'),
-            state=request_parameters.get('state'),
+            ...
             **kwargs
         )
 
@@ -296,8 +292,7 @@ Example:
     #In Client class
     async def create_oauth_session(self, za_name, gegevensdienst_id, **kwargs):
         return await self.data_store.create_oauth_session(
-            za_name=za_name,
-            gegevensdienst_id=gegevensdienst_id,
+            ...
             **kwargs
         )
 

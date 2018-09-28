@@ -75,8 +75,8 @@ class Server():
         """
         validation.validate_request_parameters(
             request_parameters,
-            (await self.get_ocl()),
-            (await self._get_whitelist())
+            await self.get_ocl(),
+            await self._get_whitelist()
         )
 
         oauth_session = await self.data_store.create_oauth_session(

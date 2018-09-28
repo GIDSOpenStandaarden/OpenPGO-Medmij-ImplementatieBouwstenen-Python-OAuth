@@ -79,6 +79,10 @@ async def test_create_oauth_session_invalid(server):
     client_id = 'oauthclient.local'
     response_type = 'code'
 
+    # TODO no client_id
+    # TODO no reponse_type
+    # TODO client_id not in whitelist
+
     invalid_parameters = {
         'state': state,
         'redirect_uri': redirect_uri,

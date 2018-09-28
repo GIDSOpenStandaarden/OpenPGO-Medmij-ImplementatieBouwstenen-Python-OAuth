@@ -65,12 +65,6 @@ def setup_db(app, db_dir):
 
     engine = create_engine('sqlite:///%s' % db_path, echo=False)
 
-    @event.listens_for(engine, "connect")
-    def set_sqlite_pragma(dbapi_connection, _):
-        cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA foreign_keys=ON")
-        cursor.close()
-
     db_session.configure(bind=engine)
 
     Base.metadata.bind = engine

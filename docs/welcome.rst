@@ -174,18 +174,19 @@ Server usage example
     import get_db_somehow
 
     import my_get_ocl
+    import my_get_whitelist
     import my_datastore_implementation
     import my_zg_resouce_available
 
     server = Server(
-        data_store=my_datastore_implemtation,
+        data_store=my_datastore_implementation,
         zg_resource_available=my_zg_resouce_available,
-        get_ocl=my_get_ocl
+        get_ocl=my_get_ocl,
+        get_whitelist=my_get_whitelist
     )
 
     app['server'] = server
     app['db] = get_db_somehow()
-
 
     async def get_start_oauth_session(request):
         query_dict = request.query

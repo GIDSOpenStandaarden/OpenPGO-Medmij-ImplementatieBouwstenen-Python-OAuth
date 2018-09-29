@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 class DataStore(ABC):
     """Abstract Class that handles interaction instantiation, persisting and lookups of OAuthSessions."""
     @abstractmethod
-    async def create_oauth_session(self, state, za_name, gegevensdienst_id, **kwargs):
+    async def create_oauth_session(self, state, za_name, gegevensdienst_id, scope, **kwargs):
         """Create a new oauth_session, persist the oauth_session and return it."""
 
     @abstractmethod

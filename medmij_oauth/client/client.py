@@ -1,4 +1,5 @@
 import urllib.parse
+import secrets
 
 from . import validation
 
@@ -8,9 +9,9 @@ class Client:
     """
     Class to assist in the OAuth clientside flow
 
-    :type data_store: `Datastore <medmij_oauth.client.html#datastore>`__
+    :type data_store: :class:`DataStore <medmij_oauth.client.DataStore>`
     :param data_store: Must be subclass of DataStore, handles data interaction with
-        OAuthSessions see `Datastore <medmij_oauth.client.html#datastore>`__
+        OAuthSessions see :class:`DataStore <medmij_oauth.client.DataStore>`
         for more info.
 
     :type get_zal: coroutine
@@ -22,7 +23,7 @@ class Client:
         `Whitelist <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
 
     :type get_gnl: coroutine
-    :param get_gnl: Function that returns a `gnl <#medmij_oauth.client.parse_gnl>`__
+    :param get_gnl: Function that returns a :func:`gnl <medmij_oauth.client.parse_gnl>`
 
     :type client_info: dict
     :param client_info: Dict containing info about the client application
@@ -55,7 +56,7 @@ class Client:
 
     async def get_zal(self):
         """
-            Return a tuple of the ZAL and GNL returned by the get_zal and get_gnl
+            Return a tuple of the ZAL and GNL (zal, gnl) returned by the get_zal and get_gnl
             function supplied in instantiation of Client object
         """
         zal = await self._get_zal()
@@ -66,7 +67,7 @@ class Client:
     async def create_oauth_session(self, za_name, gegevensdienst_id, **kwargs):
         """
         Create and return a new OAuthSession to start the oauth flow.
-        Add the zorggebruikers choice of zorgaanbieder gegevensdienst. `FLOW #2 <welcome.html#id3>`__
+        Add the zorggebruikers choice of zorgaanbieder gegevensdienst. :ref:`(FLOW #2) <flow2>`
 
         :type za_name: string
         :param za_name: Name of zorgaanbieder chosen by the zorggebruiker.
@@ -74,35 +75,38 @@ class Client:
         :type gegevensdienst_id: string
         :param gegevensdienst_id: Id of the gegevensdienst chosen by the zorggebruiker
 
-        :type \*\*args: various
-        :param \*\*args: Keyword arguments get passed on to the data_store.create_oauth_session
+        :type \*\*kwargs: various
+        :param \*\*kwargs: Keyword arguments get passed on to the data_store.create_oauth_session
             function, e.g. db object
 
-        Returns:
-            `OAuthSession <#oauthsession>`__: The created OAuthSession.
-
+        :return: The created OAuthSession
+        :rtype: :ref:`OAuthSession <client.oauthsession>`
         """
 
         return await self.data_store.create_oauth_session(
             za_name=za_name,
             gegevensdienst_id=gegevensdienst_id,
+            scope=gegevensdienst_id,
+            state=secrets.token_hex(16),
             **kwargs
         )
 
     async def create_auth_request_url(self, oauth_session):
         """
-        Build and return authorization request url `FLOW #2 <welcome.html#id3>`__
+        Build and return authorization request url :ref:`(FLOW #2) <flow2>`
 
-        :type oauth_session: `OAuthSession <#oauthsession>`__
+        :type oauth_session: :ref:`OAuthSession <client.oauthsession>`
         :param oauth_session: OAuthSession for current zorggebruiker
 
-        Returns:
-            request_url: string
+        :return: The authorization request url
+        :rtype: str
+
+        :raises: ValueError: If the server's authorization endpoint is not on the whitelist
         """
 
         request_dict = {
             'state': oauth_session.state,
-            'scope': oauth_session.gegevensdienst_id,
+            'scope': oauth_session.scope,
             'response_type': 'code',
             'client_id': self.client_id,
             'redirect_uri': self.redirect_uri
@@ -123,11 +127,20 @@ class Client:
     async def handle_auth_response(self, parameters, **kwargs):
         """
         Handles the response to the authorization request. 
-        (`FLOW #10 <welcome.html#id11>`__, `FLOW #11 <welcome.html#id12>`__)
+        (:ref:`FLOW #10 <flow10>`, :ref:`FLOW #11 <flow11>`)
 
-        The response parameters are validated and an appropriate
-        `OAuthException <medmij_oauth.exceptions.html#oauthexception>`__ is raised
-        if supplied parameters are not valid
+        :type parameters: dict
+        :param parameters: The query params from the servers's response to the authorization request
+
+        :type \*\*kwargs: various
+        :param \*\*kwargs: Keyword arguments get passed on to the data_store.get_oauth_session_by_state
+            function, e.g. db object
+
+        :return: The updated OAuthSession no containing the authorization_code, and authorized set to True
+        :rtype: :ref:`OAuthSession <client.oauthsession>`
+
+        :raises OAuthException: If validation of the params fails
+        :raises ValueError: If there is no session found linked to the state parameter in the provided query parameters
         """
         validation.validate_auth_response(parameters)
 
@@ -147,10 +160,20 @@ class Client:
         """
         Make a request to a oauth server with the supplied make_request function on instantiation of
         the Client, exchange the received authorization code for an access token and update
-        the oauth_session. `FLOW #12 <welcome.html#id13>`__
+        the oauth_session. :ref:`(FLOW #12) <flow12>`
 
-        :type oauth_session: `OAuthSession <#oauthsession>`__
+        :type oauth_session: :ref:`OAuthSession <client.oauthsession>`
         :param oauth_session: Authorized oauth session of which to exchange the authorization code
+
+        :type \*\*kwargs: various
+        :param \*\*kwargs: Keyword arguments get passed on to the data_store.save_oauth_session
+            function, e.g. db object
+
+        :return: The updated OAuthSession containing the access_token
+        :rtype: :ref:`OAuthSession <client.oauthsession>`
+
+        :raises ValueError: If the server's token endpoint is not on the whitelist
+        :raises OAuthException: If the server's response is invalid
         """
         zal, _ = await self.get_zal()
         gegevensdienst = zal[oauth_session.za_name].gegevensdiensten[oauth_session.gegevensdienst_id]

@@ -8,6 +8,9 @@
 .. image:: https://sonarcloud.io/api/project_badges/measure?project=BasKloosterman_medmij_oauth&metric=alert_status
     :target: https://sonarcloud.io/dashboard?id=BasKloosterman_medmij_oauth
 
+.. image:: https://img.shields.io/badge/License-AGPL%20v3-blue.svg
+    :target: https://www.gnu.org/licenses/agpl-3.0
+
 
 Welcome to MedMij OAuth's documentation
 =======================================
@@ -22,7 +25,7 @@ Read the full documentation on `readthedocs <https://medmij-oauth.readthedocs.io
 Tests
 =====
 
-.. code:: python
+.. code:: bash
 
     $ pytest -v
 
@@ -45,3 +48,7 @@ Tests
 -----
 - pytest==3.7.1
 - pytest-asyncio==0.9.0
+
+License
+=======
+This project is licensed under the AGPL-3.0 License - see the LICENSE file for details

@@ -46,6 +46,8 @@ coverage.xml
 *,cover
 .pytest_cache/
 
+.scannerwork
+
 # Translations
 *.mo
 *.pot

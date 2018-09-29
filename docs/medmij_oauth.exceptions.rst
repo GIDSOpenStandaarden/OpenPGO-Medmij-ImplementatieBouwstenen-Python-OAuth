@@ -1,3 +1,5 @@
+.. module:: medmij_oauth.exceptions
+
 medmij\_oauth.exceptions module
 ================================
 
@@ -6,7 +8,7 @@ Module for handling OAuth related errors as specified in `rfc6749 <https://tools
 OAuthException
 --------------
 
-.. autoclass:: medmij_oauth.exceptions.OAuthException
+.. autoexception:: medmij_oauth.exceptions.OAuthException
     :members:
 
 Error codes

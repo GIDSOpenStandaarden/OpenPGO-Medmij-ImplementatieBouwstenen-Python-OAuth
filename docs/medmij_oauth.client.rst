@@ -1,3 +1,5 @@
+.. module:: medmij_oauth.client
+
 medmij\_oauth.client module
 ============================
 
@@ -16,6 +18,8 @@ Datastore
     :members:
     :show-inheritance:
 
+.. _client.oauthsession:
+
 OAuthSession
 ------------
 
@@ -33,6 +37,7 @@ The OAuthSession should at least have the following attributes:
 - **authorized** (boolean)
 - **access_token** (string)
 
+
 Example implementation:
 
 .. code:: python
@@ -41,7 +46,7 @@ Example implementation:
         def __init__(self, state, za_name, gegevensdienst_id, scope):
             self.id = str(uuid.uuid4())
             self.state = state
-            self.scope = gegevensdienst_id
+            self.scope = scope
             self.za_name = za_name
             self.gegevensdienst_id = gegevensdienst_id
             self.authorization_code = None

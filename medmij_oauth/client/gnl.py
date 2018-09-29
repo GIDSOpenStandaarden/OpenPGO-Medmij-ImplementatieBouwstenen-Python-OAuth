@@ -13,8 +13,8 @@ def parse_gnl(gnl):
         :type gnl: xml.etree.ElementTree.ElementTree
         :param gnl: a xml.etree.ElementTree.ElementTree containing the gnl
 
-        Return:
-            dict with data from the ETree object
+        :return: gnl with data from the ETree object
+        :rtype: dict
     """
     gnl_dict = {}
 

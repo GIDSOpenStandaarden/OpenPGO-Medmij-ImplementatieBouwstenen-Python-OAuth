@@ -3,13 +3,14 @@ from medmij_oauth.client import DataStore
 from .model import OAuthSession
 
 class SQLAlchemyDataStore(DataStore):
-    async def create_oauth_session(self, za_name, gegevensdienst_id, **kwargs):
+    async def create_oauth_session(self, za_name, gegevensdienst_id, state, scope, **kwargs):
         db_session = kwargs.get('db')
 
         oauth_session = OAuthSession(
             za_name=za_name,
             gegevensdienst_id=gegevensdienst_id,
-            state=secrets.token_hex(16)
+            state=state,
+            scope=scope
         )
 
         db_session.add(oauth_session)

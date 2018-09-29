@@ -17,9 +17,9 @@ class Server():
     """
     Class to assist in the OAuth serverside flow
 
-    :type data_store: `Datastore <medmij_oauth.server.html#datastore>`__
+    :type data_store: :class:`DataStore <medmij_oauth.server.DataStore>`
     :param data_store: Must be subclass of DataStore, handles data interaction with
-        OAuthSessions see `Datastore <medmij_oauth.server.html#datastore>`__ for more info.
+        OAuthSessions see :class:`DataStore <medmij_oauth.server.DataStore>` for more info.
 
     :type zg_resource_available: function
     :param zg_resource_available: Function that is called by Server.zg_resource_available
@@ -56,21 +56,19 @@ class Server():
 
     async def create_oauth_session(self, request_parameters, **kwargs):
         """
-        Create and return a new `OAuthSession <#oauthsession>`__ request. (`FLOW #3 <welcome.html#id4>`__)
-
-        request_parameters are validated and an appropriate
-        `OAuthException <medmij_oauth.exceptions.html#oauthexception>`__ is raised if
-        supplied request_parameters are not valid
+        Create and return a new :ref:`OAuthSession <server.oauthsession>`. (:ref:`FLOW #3 <flow3>`)
 
         :type request_parameters: dict
         :param request_parameters: Dictionary containing the request parameters from the start verzamelen.
 
-        :type \*\*args: various
-        :param \*\*args: Keyword arguments get passed on to the data_store.create_oauth_session function,
+        :type \*\*kwargs: various
+        :param \*\*kwargs: Keyword arguments get passed on to the data_store.create_oauth_session function,
             e.g. db object
 
-        Returns:
-            OAuthSession: The created `OAuthSession <#oauthsession>`__.
+        :return: The created OAuthSession
+        :rtype: :ref:`OAuthSession <server.oauthsession>`
+
+        :raises OAuthException:  If supplied request_parameters are not valid
 
         """
         validation.validate_request_parameters(
@@ -94,12 +92,12 @@ class Server():
         """
         Determine if this service has resources available for this zorggebruikers by
         calling the supplied zg_resource_available function on instatiation of the
-        Server. (`FLOW #8 <welcome.html#id9>`__)
+        Server. (:ref:`FLOW #8 <flow8>`)
 
         This function requires a least an oauth_session or an oauthsession id.
         BSN is added to the client_data that is passed to the self._zg_resource_available function.
 
-        :type oauth_session: `OAuthSession <#oauthsession>`__
+        :type oauth_session: :ref:`OAuthSession <server.oauthsession>`
         :param oauth_session: OAuthSession for the current zorggebruiker (optional).
 
         :type oauth_session_id: string
@@ -109,11 +107,13 @@ class Server():
         :param client_data: Optional additional zorggebruikerinfo that gets passed on to
             the self._zg_resource_available function.
 
-        :type \*\*args: various
-        :param \*\*args: Keyword arguments get passed to the supplied self._zg_resource_available function
+        :type \*\*kwargs: various
+        :param \*\*kwargs: Keyword arguments get passed to the supplied self._zg_resource_available function
 
-        Returns:
-            bool: returns True if zorggebruiker is known to this service, otherwise a OAuthException is raised
+        :return: returns True if resouces are available for this zorggebruiker
+        :rtype: bool
+
+        :raises OAuthException: If there is no resource available for this zorggebruiker
 
         """
         if oauth_session is None:
@@ -137,25 +137,22 @@ class Server():
         return True
 
     async def handle_auth_grant(self, oauth_session_id=None, authorized=False, **kwargs):
-        """Handle the zorggebruikers response to the authorization question. (`FLOW #10 <welcome.html#id11>`__)
-
-        Log whether the zorggebruiker authorized the request.
-        If the authorization request is denied an OAuthException is raised.
-        If the authorization request is granted a tuple is returned containing the OAuthSession
-        and redirect_url.
+        """
+        Handle the zorggebruikers response to the authorization question. (:ref:`FLOW #10 <flow10>`)
 
         :type oauth_session_id: str
         :param oauth_session_id: ID for the OAuthSession of current zorggebruiker.
 
         :type authorized: bool
-        :param authorized: optional additional zorggebruikerinfo that gets passed on to the
-            self._zg_resource_available function.
+        :param authorized: Indicates if zorggebruiker response was negative (False) or positive (True)
 
-        :type \*\*args: various
-        :param \*\*args: Keyword arguments get passed on to the various DataStore functions, e.g. db object
+        :type \*\*kwargs: various
+        :param \*\*kwargs: Keyword arguments get passed on to self.data_store.get_oauth_session_by_id and self.data_store.save_oauth_session
 
-        Returns:
-            tuple: (OAuthSession, redirect_url)
+        :return: Tuple containing the updated OAuthSession (with *authorization_code* and *authorization_code_expiration*) and the redirect_url
+        :rtype: tuple (OAuthSession, str)
+
+        :raises OAuthException: If zorggebruiker response was negative
 
         """
         oauth_session = await self.data_store.get_oauth_session_by_id(oauth_session_id, **kwargs)
@@ -183,17 +180,21 @@ class Server():
 
         oauth_session = await self.data_store.save_oauth_session(oauth_session, **kwargs)
 
-        return (oauth_session, self.get_authorization_code_redirect_url(oauth_session))
+        return (oauth_session, self._get_authorization_code_redirect_url(oauth_session))
 
-    def get_authorization_code_redirect_url(self, oauth_session):
+    def _get_authorization_code_redirect_url(self, oauth_session):
         """
         Generate a authorization code redirect url for an authorized oauth session.
 
-        :type oauth_session: `OAuthSession <#oauthsession>`__
+        :warning: Don't call this method yourself, it is called by :meth:`Server.handle_auth_grant<mednij_oauth.server.Server.handle_auth_grant>`
+
+        :type oauth_session: :ref:`OAuthSession <server.oauthsession>`
         :param oauth_session: OAuthSession for which to create the authorization code redirect url.
 
-        Returns:
-            str: authorization code redirect url
+        :return: authorization code redirect url
+        :rtype: str
+
+        :raises ValueError: If session is not authorized
 
         """
 
@@ -213,19 +214,19 @@ class Server():
     async def exchange_authorization_code(self, request_parameters, **kwargs):
         """
         Handle the oauth client's request to exchange the authorization code
-        for an access token. (`FLOW #13 <welcome.html#id14>`__)
-
-        Validate the request, update the oauth_session and return dict with response parameters.
+        for an access token. (:ref:`FLOW #13 <flow13>`)
 
         :type request_parameters: str
         :param request_parameters: Params send with the request.
 
-        :type \*\*args: various
-        :param \*\*args: Keyword arguments get passed on to the various DataStore functions,
+        :type \*\*kwargs: various
+        :param \*\*kwargs: Keyword arguments get passed on to the various DataStore functions,
             e.g. db object
 
-        Returns:
-            dict: Dict containing the parameters for a valid response
+        :return: Dict containing the parameters for a valid response, including the *access_token*, *token_type*, *expires_in* and *scope*
+        :rtype: dict
+
+        :raises OAuthException: If request parameters are invalid
 
         """
         oauth_session = await self.data_store.get_oauth_session_by_authorization_code(

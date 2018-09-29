@@ -1,6 +1,6 @@
 Tests
 =====
 
-.. code:: python
+.. code:: bash
 
     $ pytest -v

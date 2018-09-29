@@ -45,7 +45,7 @@ class OAuthSession():
     def __init__(self, state, za_name, gegevensdienst_id, scope):
         self.id = str(uuid.uuid4())
         self.state = state
-        self.scope = gegevensdienst_id
+        self.scope = scope
         self.za_name = za_name
         self.gegevensdienst_id = gegevensdienst_id
         self.authorization_code = None

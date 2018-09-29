@@ -85,6 +85,7 @@ html_theme = 'sphinx_rtd_theme'
 # documentation.
 #
 html_theme_options = {
+    'style_external_links': True
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

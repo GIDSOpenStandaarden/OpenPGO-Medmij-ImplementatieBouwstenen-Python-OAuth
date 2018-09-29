@@ -101,8 +101,8 @@ class OAuthException(BaseException):
     """
     OAuthException class, represents a oauth error as described in `rfc6749 <https://tools.ietf.org/html/rfc6749#section-4.1.1>`__
 
-    :type error_code: int, `error code <#medmij_oauth.exceptions.ERRORS>`__
-    :param error_code: Int that represents a type of error, will be looked up in the ERRORS enum
+    :type error_code: :exc:`error code <medmij_oauth.exceptions.ERRORS>`
+    :param error_code: Int that represents a type of error
     :type error_description: string
     :param error_description: Human readable description of the error e.g. 'no such resource'
     :type redirect: bool

@@ -125,7 +125,7 @@ zg_resource_available
 An coroutine with signature :code:`(client_data:dict, **kwargs:various)->bool` that checks if resources are available for the current zorggebruiker.
 Is called when :meth:`Server.zg_resource_available <medmij_oauth.server.Server.zg_resource_available>` is invoked, with a dict containing at least the BSN of the zorggebruiker.
 
-.. warning:: BSN is added to the OAuthSession in response to the DigiD interaction `FLOW #7 <#id8>`__, this is not (yet) included in the Server class. If you are implementing a server make sure to update the OAuthSession after retreiving the BSN from DigiD.
+.. warning:: BSN is added to the OAuthSession in response to the DigiD interaction (:ref:`FLOW #7 <flow7>`), this is not (yet) included in the Server class. If you are implementing a server make sure to update the OAuthSession after retreiving the BSN from DigiD.
 
 get_ocl
 -------

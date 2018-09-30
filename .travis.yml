@@ -6,6 +6,10 @@ matrix:
       dist: xenial
       sudo: true
 
+addons:
+  sonarcloud:
+    organization: "baskloosterman-github"
+
 # command to install dependencies
 install:
   - pip install -r requirements.txt
@@ -13,4 +17,5 @@ install:
 
 # command to run tests
 script:
-  - pytest -v
+  - pytest --cov-report=xml --cov=medmij_oauth tests/
+  - sonar-scanner

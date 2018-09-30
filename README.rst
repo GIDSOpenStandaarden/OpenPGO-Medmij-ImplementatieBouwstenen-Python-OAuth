@@ -1,12 +1,12 @@
-.. image:: https://readthedocs.org/projects/medmij-oauth/badge/?version=latest
-    :target: https://medmij-oauth.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/openpgo-medmij-implementatiebouwstenen-python-oauth/badge/?version=latest
+    :target: https://openpgo-medmij-implementatiebouwstenen-python-oauth.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. image:: https://travis-ci.org/BasKloosterman/medmij_oauth.svg?branch=master
-    :target: https://travis-ci.org/BasKloosterman/medmij_oauth
+.. image:: https://travis-ci.org/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python-OAuth.svg?branch=master
+    :target: https://travis-ci.org/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python-OAuth
 
-.. image:: https://sonarcloud.io/api/project_badges/measure?project=BasKloosterman_medmij_oauth&metric=alert_status
-    :target: https://sonarcloud.io/dashboard?id=BasKloosterman_medmij_oauth
+.. image:: https://sonarcloud.io/api/project_badges/measure?project=OpenPGO_Python_OAuth&metric=alert_status
+    :target: https://sonarcloud.io/dashboard?id=OpenPGO_Python_OAuth
 
 .. image:: https://img.shields.io/badge/License-AGPL%20v3-blue.svg
     :target: https://www.gnu.org/licenses/agpl-3.0
@@ -20,7 +20,7 @@ The client and server submodules are build for use with an async library like `a
 
 Beside the package there are two example implementations available on the `github repo <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python-OAuth>`__, an oauth server and client implementation built using these modules (Only a reference, not for production use!).
 
-Read the full documentation on `readthedocs <https://medmij-oauth.readthedocs.io/en/latest/welcome.html>`__.
+Read the full documentation on `readthedocs <https://openpgo-medmij-implementatiebouwstenen-python-oauth.readthedocs.io/en/latest/welcome.html>`__.
 
 Tests
 =====

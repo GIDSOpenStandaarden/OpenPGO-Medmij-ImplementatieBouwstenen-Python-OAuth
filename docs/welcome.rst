@@ -322,7 +322,7 @@ Example implementation:
 get_gnl
 -------
 
-An coroutine that returns a `GNL <https://afsprakenstelsel.medmij.nl/display/PUBLIC/Processen+en+informatie>`__. The supplied :func:`parse_gnl <medmij_oauth.client.parse_gnl>` function can be used to parse the Gegevensdienstnamenlijst xml.
+An coroutine that returns a `GNL <https://afsprakenstelsel.medmij.nl/display/PUBLIC/Processen+en+informatie>`__.
 
 Example implementation:
 
@@ -330,13 +330,10 @@ Example implementation:
 
     async def get_test_gnl():
         # Probably some caching and retreiving an up to date list but as an example load it from disk.
+        with open(path.join(path.dirname(__file__), 'resources/MedMij_Gegevensdienstnamenlijst_example.xml'), 'r') as file:
+            xml = bytes(file.read(), 'utf-8')
 
-        gnl = parse_gnl(ET.parse(
-           'path/to/MedMij_Gegevensdienstnamenlijst_example.xml'
-        ).getroot())
-
-        return gnl
-
+        return medmij_lists.GNL(xmldata=xml)
 
 client_info
 -----------

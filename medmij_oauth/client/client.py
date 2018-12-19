@@ -18,8 +18,8 @@ class Client:
     :param get_zal: Function that returns a
         `ZAL <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
 
-     :type get_gnl: coroutine
-    :param get_gnl: Function that returns a :func:`gnl <medmij_oauth.client.parse_gnl>`
+    :type get_gnl: coroutine
+    :param get_gnl: Function that returns a `GegevensdienstNamenlijst <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
 
     :type client_info: dict
     :param client_info: Dict containing info about the client application

@@ -22,6 +22,13 @@ Beside the package there are two example implementations available on the `githu
 
 Read the full documentation on `readthedocs <https://openpgo-medmij-implementatiebouwstenen-python-oauth.readthedocs.io/en/latest/welcome.html>`__.
 
+Installation
+============
+
+.. code:: bash
+
+    $ pip install medmij-oauth
+
 Tests
 =====
 

@@ -1,2 +1,2 @@
 sphinxcontrib-asyncio
--e git+https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python.git#egg=medmij
+medmij-lists

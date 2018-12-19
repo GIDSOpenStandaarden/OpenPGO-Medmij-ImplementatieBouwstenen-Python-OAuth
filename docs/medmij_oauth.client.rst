@@ -8,10 +8,6 @@ Client
 .. autoclass:: medmij_oauth.client.Client
     :members:
 
-GNL (Gegevensdienstnamenlijst)
-------------------------------
-.. autofunction:: medmij_oauth.client.parse_gnl
-
 Datastore
 ---------
 .. autoclass:: medmij_oauth.client.DataStore

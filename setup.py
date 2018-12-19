@@ -1,12 +1,12 @@
 import setuptools
 import pathlib
 import re
-here = pathlib.Path(__file__).parent
 
 with open("README.rst", "r") as fh:
     long_description = fh.read()
 
-txt = (here / 'medmij_oauth' / '__init__.py').read_text('utf-8')
+with open('medmij_oauth/__init__.py') as fp:
+    txt = fp.read()
 
 try:
     version = re.findall(r"^__version__ = '([^']+)'\r?$",
@@ -14,17 +14,21 @@ try:
 except IndexError:
     raise RuntimeError('Unable to determine version.')
 
+with open('requirements.txt') as fp:
+    install_requires = fp.read()
+
 setuptools.setup(
-    name="medmij_oauth",
-    version="0.0.1",
+    name="medmij-oauth",
+    version=version,
     author="Bas Kloosterman",
     author_email="bask@whiteboxsystems.nl",
     description="Libraries for oauth client/server implementations according to the MedMij requirements",
     long_description=long_description,
-    long_description_content_type="text/markdown",
-    url="https://github.com/baskloosterman/medmij_oauth",
+    long_description_content_type="text/x-rst",
+    url="https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python-OAuth",
     license='AGPLv3',
     python_requires='>=3.6',
+    install_requires=install_requires.split('\n'),
     packages=setuptools.find_packages(exclude=(
         'client_implementation',
         'server_implementation',
@@ -34,9 +38,6 @@ setuptools.setup(
     )),
     classifiers=[
         "Programming Language :: Python :: 3.7",
-        "License :: OSI Approved :: GNU Affero General Public License v3"
-        "Operating System :: OS Independent",
-        "Intended Audience :: Healthcare Industry",
-        "Development Status :: 1 - Planning"
-    ],
+        "Intended Audience :: Healthcare Industry"
+    ]
 )

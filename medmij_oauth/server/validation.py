@@ -62,7 +62,7 @@ def validate_redirect_uri(url='', client_hostname=''):
 def is_expired(expiration_time=datetime.now()):
     return datetime.now() >= expiration_time
 
-def validate_request_parameters(request_parameters, ocl, whitelist):
+def validate_request_parameters(request_parameters, ocl):
     redirect_uri = request_parameters.get('redirect_uri', None)
     response_type = request_parameters.get('response_type', None)
     client_id = request_parameters.get('client_id', None)
@@ -78,12 +78,6 @@ def validate_request_parameters(request_parameters, ocl, whitelist):
         raise OAuthException(
             error_code=ERRORS.INVALID_CLIENT,
             error_description='client unknown'
-        )
-
-    if not ocl.get(client_id).hostname in whitelist:
-        raise OAuthException(
-            error_code=ERRORS.INVALID_CLIENT,
-            error_description='client not on whitelist'
         )
 
     validate_redirect_uri(redirect_uri, ocl.get(client_id).hostname)

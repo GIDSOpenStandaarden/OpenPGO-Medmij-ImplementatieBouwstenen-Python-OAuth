@@ -14,8 +14,7 @@ from medmij_oauth.exceptions import OAuthException
 from .util import (
     ret_true,
     ret_false,
-    create_get_test_ocl,
-    create_get_test_whitelist
+    create_get_test_ocl
 )
 
 from datetime import datetime
@@ -25,7 +24,6 @@ def server(request):
     return Server(
         data_store=InMemoryDataStore(),
         get_ocl=create_get_test_ocl(),
-        get_whitelist=create_get_test_whitelist(),
         zg_resource_available=ret_true
     )
 
@@ -81,7 +79,6 @@ async def test_create_oauth_session_invalid(server):
 
     # TODO no client_id
     # TODO no reponse_type
-    # TODO client_id not in whitelist
 
     invalid_parameters = {
         'state': state,

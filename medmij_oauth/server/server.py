@@ -29,15 +29,11 @@ class Server():
     :param get_ocl: Function that returns a
         `OCL <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
 
-    :type get_whitelist: coroutine
-    :param get_whitelist: Function that returns a
-        `Whitelist <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
     """
 
-    def __init__(self, data_store=None, zg_resource_available=None, get_ocl=None, get_whitelist=None):
+    def __init__(self, data_store=None, zg_resource_available=None, get_ocl=None):
         assert zg_resource_available is not None, "Can't instantiate Server without 'zg_resource_available'"
         assert get_ocl is not None, "Can't instantiate Server without 'get_ocl'"
-        assert get_whitelist is not None, "Can't instantiate Server without 'get_whitelist'"
 
         if not issubclass(data_store.__class__, DataStore):
             raise ValueError(
@@ -46,7 +42,6 @@ class Server():
 
         self.data_store = data_store
         self._get_ocl = get_ocl
-        self._get_whitelist = get_whitelist
         self._zg_resource_available = zg_resource_available
 
     async def get_ocl(self):
@@ -73,8 +68,7 @@ class Server():
         """
         validation.validate_request_parameters(
             request_parameters,
-            await self.get_ocl(),
-            await self._get_whitelist()
+            await self.get_ocl()
         )
 
         oauth_session = await self.data_store.create_oauth_session(

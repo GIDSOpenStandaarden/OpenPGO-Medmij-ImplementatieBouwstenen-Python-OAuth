@@ -20,14 +20,6 @@ def validate_auth_response(data):
 
     return True
 
-def validate_endpoint(endpoint, whitelist):
-    hostname = get_hostname(endpoint)
-
-    if not hostname in whitelist:
-        raise ValueError(f'Hostname not whitelisted: {hostname}')
-
-    return True
-
 def validate_access_token_response(data, oauth_session):
     if oauth_session.access_token:
         raise ValueError('Access token already exchanged')

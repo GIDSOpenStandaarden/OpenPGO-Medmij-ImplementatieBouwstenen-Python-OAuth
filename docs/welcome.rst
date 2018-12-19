@@ -144,23 +144,6 @@ Example implementation:
 
         return medmij_lists.OAuthclientList(xmldata=xml)
 
-get_whitelist
--------------
-
-An coroutine that returns a `Whitelist <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__.
-
-Example implementation:
-
-.. code:: python
-
-    async def get_whitelist():
-        # Probably some caching and retreiving an up to date list but as an example load it from disk.
-        async with aiofiles.open('path/to/whitelist.xml'), mode='r') as file:
-            contents = await f.read()
-            xml = bytes(file.read(), 'utf-8')
-
-        return medmij_lists.Whitelist(xmldata=xml)
-
 Server usage example
 --------------------
 
@@ -171,15 +154,13 @@ Server usage example
     import get_db_somehow
 
     import my_get_ocl
-    import my_get_whitelist
     import my_datastore_implementation
     import my_zg_resouce_available
 
     server = Server(
         data_store=my_datastore_implementation,
         zg_resource_available=my_zg_resouce_available,
-        get_ocl=my_get_ocl,
-        get_whitelist=my_get_whitelist
+        get_ocl=my_get_ocl
     )
 
     app['server'] = server
@@ -225,7 +206,6 @@ To make use of the Client class you need to implement/supply the following:
 - subclass of DataStore (class)
 - OAuthSession (class)
 - get_zal (coroutine)
-- get_whitelist (coroutine)
 - get_gnl (coroutine)
 - client_info (dict)
 - make_request (coroutine)
@@ -338,29 +318,11 @@ Example implementation:
 
         return medmij_lists.ZAL(xmldata=xml)
 
-get_whitelist
--------------
-
-An coroutine that returns a `Whitelist <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__.
-
-Example implementation:
-
-.. code:: python
-
-    async def get_whitelist():
-        # Probably some caching and retreiving an up to date list but as an example load it from disk.
-        async with aiofiles.open('path/to/whitelist.xml'), mode='r') as file:
-            contents = await f.read()
-            xml = bytes(file.read(), 'utf-8')
-
-        return medmij_lists.Whitelist(xmldata=xml)
-
-
 
 get_gnl
 -------
 
-An coroutine that returns a `GNL <https://afsprakenstelsel.medmij.nl/display/PUBLIC/Processen+en+informatie>`__. The supplied :func:`parse_gnl <medmij_oauth.client.parse_gnl>` function can be used to parse the Gegevensdienstnamenlijst xml.
+An coroutine that returns a `GNL <https://afsprakenstelsel.medmij.nl/display/PUBLIC/Processen+en+informatie>`__.
 
 Example implementation:
 
@@ -368,13 +330,10 @@ Example implementation:
 
     async def get_test_gnl():
         # Probably some caching and retreiving an up to date list but as an example load it from disk.
+        with open(path.join(path.dirname(__file__), 'resources/MedMij_Gegevensdienstnamenlijst_example.xml'), 'r') as file:
+            xml = bytes(file.read(), 'utf-8')
 
-        gnl = parse_gnl(ET.parse(
-           'path/to/MedMij_Gegevensdienstnamenlijst_example.xml'
-        ).getroot())
-
-        return gnl
-
+        return medmij_lists.GNL(xmldata=xml)
 
 client_info
 -----------
@@ -428,7 +387,6 @@ Client usage example
 
     import my_datastore_implementation
     import my_get_zal
-    import my_get_whitelist
     import my_get_gnl
     import my_make_request
 
@@ -440,7 +398,6 @@ Client usage example
     client = Client(
         data_store=my_datastore_implemtation,
         get_zal=my_get_zal,
-        get_whitelist=my_get_whitelist,
         get_gnl=my_get_gnl,
         make_request=my_make_request,
         client_info=client_info

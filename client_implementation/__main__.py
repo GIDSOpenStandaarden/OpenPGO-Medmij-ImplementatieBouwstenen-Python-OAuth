@@ -36,8 +36,7 @@ from medmij_oauth.client import (
 
 from tests.util import (
     create_get_test_zal,
-    create_get_test_gnl,
-    create_get_test_whitelist
+    create_get_test_gnl
 )
 
 from . util import (
@@ -82,8 +81,7 @@ def setup_client(app, client_info):
         client_info=client_info,
         make_request=request_maker.make_request,
         get_zal=create_get_test_zal(),
-        get_gnl=create_get_test_gnl(),
-        get_whitelist=create_get_test_whitelist()
+        get_gnl=create_get_test_gnl()
     )
 
     app['client'] = client

@@ -1,8 +1,7 @@
 from os import path
 import xml.etree.ElementTree as ET
 
-import medmij as medmij_lists
-from medmij_oauth.client import parse_gnl
+import medmij_lists
 
 async def ret_false(**kwargs):
     return False
@@ -20,7 +19,9 @@ def create_get_test_ocl():
         with open(path.join(path.dirname(__file__), 'resources/ocl.xml'), 'r') as file:
             xml = bytes(file.read(), 'utf-8')
 
-        return medmij_lists.OAuthclientList(xmldata=xml)
+        ocl = medmij_lists.OAuthclientList(xmldata=xml)
+
+        return ocl
 
     return get_test_ocl
 
@@ -31,30 +32,14 @@ def create_get_test_gnl():
         if gnl is not None:
             return gnl
 
-        gnl = parse_gnl(ET.parse(
-            path.join(path.dirname(__file__), 'resources/MedMij_Gegevensdienstnamenlijst_example.xml')
-        ).getroot())
-
-        return gnl
-    
-    return get_test_gnl
-
-def create_get_test_whitelist():
-    whitelist = None
-
-    async def get_test_whitelist():
-        nonlocal whitelist
-        if whitelist is not None:
-            return whitelist
-
-        with open(path.join(path.dirname(__file__), 'resources/whitelist.xml'), 'r') as file:
+        with open(path.join(path.dirname(__file__), 'resources/MedMij_Gegevensdienstnamenlijst_example.xml'), 'r') as file:
             xml = bytes(file.read(), 'utf-8')
 
-        whitelist = medmij_lists.Whitelist(xmldata=xml)
+        gnl = medmij_lists.GNL(xmldata=xml)
 
-        return whitelist
+        return gnl
 
-    return get_test_whitelist
+    return get_test_gnl
 
 def create_get_test_zal():
     zal = None

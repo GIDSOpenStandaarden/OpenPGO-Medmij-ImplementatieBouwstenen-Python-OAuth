@@ -18,12 +18,8 @@ class Client:
     :param get_zal: Function that returns a
         `ZAL <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
 
-    :type get_whitelist: coroutine
-    :param get_whitelist: Function that returns a
-        `Whitelist <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
-
     :type get_gnl: coroutine
-    :param get_gnl: Function that returns a :func:`gnl <medmij_oauth.client.parse_gnl>`
+    :param get_gnl: Function that returns a `GegevensdienstNamenlijst <https://github.com/GidsOpenStandaarden/OpenPGO-Medmij-ImplementatieBouwstenen-Python>`__
 
     :type client_info: dict
     :param client_info: Dict containing info about the client application
@@ -35,10 +31,9 @@ class Client:
         request to the oauth server.
     """
 
-    def __init__(self, data_store=None, get_zal=None, get_gnl=None, get_whitelist=None, client_info=None, make_request=None):
+    def __init__(self, data_store=None, get_zal=None, get_gnl=None, client_info=None, make_request=None):
         assert get_zal is not None, "Can't instantiate Client without 'get_zal'"
         assert get_gnl is not None, "Can't instantiate Client without 'get_gnl'"
-        assert get_whitelist is not None, "Can't instantiate Client without 'get_whitelist'"
         assert make_request is not None, "Can't instantiate Client without 'make_request'"
         assert client_info is not None, "Can't instantiate Client without 'client_info'"
 
@@ -52,7 +47,6 @@ class Client:
         self.make_request = make_request
         self._get_zal = get_zal
         self._get_gnl = get_gnl
-        self._get_whitelist = get_whitelist
 
     async def get_zal(self):
         """
@@ -100,8 +94,6 @@ class Client:
 
         :return: The authorization request url
         :rtype: str
-
-        :raises: ValueError: If the server's authorization endpoint is not on the whitelist
         """
 
         request_dict = {
@@ -116,11 +108,6 @@ class Client:
         za = zal[oauth_session.za_name]
         gegevensdienst = za.gegevensdiensten[oauth_session.gegevensdienst_id]
         query_parameters = urllib.parse.urlencode(request_dict)
-
-        validation.validate_endpoint(
-            gegevensdienst.authorization_endpoint_uri,
-            await self._get_whitelist()
-        )
 
         return f'{gegevensdienst.authorization_endpoint_uri}?{query_parameters}'
 
@@ -172,13 +159,10 @@ class Client:
         :return: The updated OAuthSession containing the access_token
         :rtype: :ref:`OAuthSession <client.oauthsession>`
 
-        :raises ValueError: If the server's token endpoint is not on the whitelist
         :raises OAuthException: If the server's response is invalid
         """
         zal, _ = await self.get_zal()
         gegevensdienst = zal[oauth_session.za_name].gegevensdiensten[oauth_session.gegevensdienst_id]
-
-        validation.validate_endpoint(gegevensdienst.token_endpoint_uri, await self._get_whitelist())
 
         response = await self.make_request(url=gegevensdienst.token_endpoint_uri, body={
             'grant_type': 'authorization_code',

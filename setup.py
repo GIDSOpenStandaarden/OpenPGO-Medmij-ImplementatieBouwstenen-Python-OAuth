@@ -15,8 +15,8 @@ except IndexError:
     raise RuntimeError('Unable to determine version.')
 
 setuptools.setup(
-    name="medmij_oauth",
-    version="0.0.1",
+    name="medmij-oauth",
+    version="0.1.0",
     author="Bas Kloosterman",
     author_email="bask@whiteboxsystems.nl",
     description="Libraries for oauth client/server implementations according to the MedMij requirements",
@@ -34,9 +34,6 @@ setuptools.setup(
     )),
     classifiers=[
         "Programming Language :: Python :: 3.7",
-        "License :: OSI Approved :: GNU Affero General Public License v3"
-        "Operating System :: OS Independent",
-        "Intended Audience :: Healthcare Industry",
-        "Development Status :: 1 - Planning"
+        "Intended Audience :: Healthcare Industry"
     ],
 )

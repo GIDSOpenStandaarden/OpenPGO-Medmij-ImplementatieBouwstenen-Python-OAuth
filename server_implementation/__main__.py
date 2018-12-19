@@ -37,8 +37,7 @@ from medmij_oauth.server import (
 from tests.util import (
     ret_false,
     ret_true,
-    create_get_test_ocl,
-    create_get_test_whitelist
+    create_get_test_ocl
 )
 
 from . import (
@@ -75,8 +74,7 @@ def setup_server(app):
     server = Server(
         data_store=SQLAlchemyDataStore(),
         zg_resource_available=ret_true,
-        get_ocl=create_get_test_ocl(),
-        get_whitelist=create_get_test_whitelist()
+        get_ocl=create_get_test_ocl()
     )
 
     app['server'] = server

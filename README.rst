@@ -52,3 +52,17 @@ Tests
 License
 =======
 This project is licensed under the AGPL-3.0 License - see the LICENSE file for details
+
+Version Guidance
+================
+
+This library follows `Semantic Versioning <https://semver.org/>`__.
+The versions of the Afsprakenset are mapped to the versions of the library as follows:
+
++-------------------------------------------+------------+-----------------+
+| Version Afsprakenset                      | Status     | Version library |
++===========================================+============+=================+
+| `Afsprakenset 1.1 <afsprakenset11_>`__    | Latest     | 0.1.*           |
++-------------------------------------------+------------+-----------------+
+
+.. _afsprakenset11: https://afsprakenstelsel.medmij.nl/display/PUBLIC/Afsprakenset+release+1.1

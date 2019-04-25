@@ -47,9 +47,9 @@ Example implementations
 -----------------------
 - aiohttp==3.3.2
 - aiohttp-jinja2==1.0.0
-- aiohttp-session==2.5.1
+- aiohttp-session>=2.7.0
 - cryptography==2.3
-- SQLAlchemy==1.2.10
+- SQLAlchemy>=1.3.0
 
 Tests
 -----

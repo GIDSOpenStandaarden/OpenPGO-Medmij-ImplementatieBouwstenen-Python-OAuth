@@ -1,3 +1,7 @@
+# This repository has been archived
+
+Dear reader, The decision has been made to archive this repository. The reason is that the OpenPGO-Medmij-ImplementatieBouwstenen-NodeJS isn’t being used and has deferred maintenance including security vulnerabilities. If you desire to use this adapter, please contact GIDS: info@gidsopenstandaarden.org.
+
 .. image:: https://readthedocs.org/projects/openpgo-medmij-implementatiebouwstenen-python-oauth/badge/?version=latest
     :target: https://openpgo-medmij-implementatiebouwstenen-python-oauth.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
